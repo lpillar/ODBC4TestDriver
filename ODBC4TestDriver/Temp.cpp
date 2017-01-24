@@ -1,5 +1,4 @@
-#include "windows.h"
-#include "sqlext.h"
+#include "Globals.h"
 
 SQLRETURN  SQL_API SQLBindCol(SQLHSTMT StatementHandle,
     SQLUSMALLINT ColumnNumber, SQLSMALLINT TargetType,
@@ -242,8 +241,16 @@ SQLRETURN  SQL_API SQLGetInfo(SQLHDBC ConnectionHandle,
     SQLUSMALLINT InfoType, _Out_writes_bytes_opt_(BufferLength) SQLPOINTER InfoValue,
     SQLSMALLINT BufferLength, _Out_opt_ SQLSMALLINT *StringLengthPtr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    switch (InfoType)
+    {
+    case SQL_DRIVER_ODBC_VER:
+        _tcscpy_s((TCHAR*)InfoValue, BufferLength / sizeof(TCHAR), TEXT(SQL_SPEC_STRING));
+        *StringLengthPtr = _tclen((TCHAR*)InfoValue) * sizeof(TCHAR);
+        return SQL_SUCCESS;
+    default:
+        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        return SQL_ERROR;
+    }
 }
 
 SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
@@ -342,8 +349,7 @@ SQLRETURN  SQL_API SQLSetEnvAttr(SQLHENV EnvironmentHandle,
     SQLINTEGER Attribute, _In_reads_bytes_opt_(StringLength) SQLPOINTER Value,
     SQLINTEGER StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLSetStmtAttr(SQLHSTMT StatementHandle,

@@ -1,5 +1,4 @@
-#include "windows.h"
-#include "sqlext.h"
+#include "Globals.h"
 
 SQLRETURN  SQL_API SQLExecDirect
 (

@@ -1,5 +1,4 @@
 LIBRARY ODBC4TestDriver
-DESCRIPTION "ODBC 4.0 Test Driver"
 EXPORTS
 	SQLAllocEnv
 	SQLAllocStmt
