@@ -17,10 +17,10 @@ SQLRETURN  SQL_API SQLAllocHandle(SQLSMALLINT HandleType,
     switch (HandleType)
     {
     case SQL_HANDLE_DBC:
-        //*OutputHandle = new HandleDbc();
+        *OutputHandle = new DbcStruct;
         return SQL_SUCCESS;
     case SQL_HANDLE_ENV:
-        //*OutputHandle = new HandleEnv();
+        *OutputHandle = new EnvStruct;
         return SQL_SUCCESS;
     default:
         MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);

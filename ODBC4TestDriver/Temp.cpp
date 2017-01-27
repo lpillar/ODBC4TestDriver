@@ -232,8 +232,7 @@ SQLRETURN  SQL_API SQLGetFunctions(SQLHDBC ConnectionHandle,
     _Out_writes_opt_(_Inexpressible_("Buffer length pfExists points to depends on fFunction value."))
     SQLUSMALLINT *Supported)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    return SQL_SUCCESS;
 }
 
 _Success_(return == SQL_SUCCESS)
@@ -245,7 +244,13 @@ SQLRETURN  SQL_API SQLGetInfo(SQLHDBC ConnectionHandle,
     {
     case SQL_DRIVER_ODBC_VER:
         _tcscpy_s((TCHAR*)InfoValue, BufferLength / sizeof(TCHAR), TEXT(SQL_SPEC_STRING));
-        *StringLengthPtr = _tclen((TCHAR*)InfoValue) * sizeof(TCHAR);
+        *StringLengthPtr = (sizeof(InfoValue) + 1) * sizeof(TCHAR);
+        return SQL_SUCCESS;
+    case SQL_ASYNC_DBC_FUNCTIONS:
+        *(SQLINTEGER*)InfoValue = 0;
+        return SQL_SUCCESS;
+    case SQL_ASYNC_NOTIFICATION:
+        *(SQLINTEGER*)InfoValue = SQL_ASYNC_NOTIFICATION_NOT_CAPABLE;
         return SQL_SUCCESS;
     default:
         MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
@@ -311,8 +316,15 @@ SQLRETURN  SQL_API SQLSetConnectAttr(SQLHDBC ConnectionHandle,
     SQLINTEGER Attribute, _In_reads_bytes_opt_(StringLength) SQLPOINTER Value,
     SQLINTEGER StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    switch (Attribute)
+    {
+    case SQL_ATTR_ANSI_APP:
+        ((DbcStruct*)ConnectionHandle)->ansiApp = (SQLINTEGER)Value;
+        return SQL_SUCCESS;
+    default:
+        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        return SQL_ERROR;
+    }
 }
 
 SQLRETURN  SQL_API SQLSetCursorName

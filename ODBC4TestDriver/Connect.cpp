@@ -18,6 +18,15 @@ SQLRETURN SQL_API SQLDriverConnect(
     //newHandle->client =  new DocumentClient(*((HandleDbc*)hdbc)->conf);
     //fDriverCompletion = SQL_DRIVER_COMPLETE;
 
+    if (szConnStrOut && pcchConnStrOut > 0)
+    {
+        _tcscpy_s((SQLTCHAR *)szConnStrOut, cchConnStrIn, (SQLTCHAR *)szConnStrIn);
+        if (pcchConnStrOut)
+        {
+            *pcchConnStrOut = cchConnStrIn;
+        }
+    }
+    
     return SQL_SUCCESS;
 }
 

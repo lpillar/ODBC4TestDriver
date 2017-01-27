@@ -1,7 +1,9 @@
 #pragma once
+
 #include <Windows.h>
 #include <tchar.h>
-#include "sqlext.h"
+#include <sqlucode.h>
+
 
 #include <cpprest/json.h>
 #include <documentdbcpp\DocumentClient.h>
@@ -15,13 +17,14 @@ using namespace web::json;
 
 void TestTrace(LPCTSTR s);
 
-struct HandleDbc
+struct DbcStruct
 {
     DocumentDBConfiguration *conf;
     DocumentClient *client;
+    SQLINTEGER ansiApp;
 };
 
-struct HandleEnv
+struct EnvStruct
 {
 
 };
