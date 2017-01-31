@@ -13,18 +13,15 @@ SQLRETURN SQL_API SQLDriverConnect(
     SQLSMALLINT       *pcchConnStrOut,
     SQLUSMALLINT       fDriverCompletion)
 {
-    //HandleDbc *newHandle = (HandleDbc*)hdbc;
-    //newHandle->conf = new DocumentDBConfiguration(TEXT("https://localhost:8081"), TEXT("C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="));
-    //newHandle->client =  new DocumentClient(*((HandleDbc*)hdbc)->conf);
-    //fDriverCompletion = SQL_DRIVER_COMPLETE;
+    /*DbcStruct *dbc = (DbcStruct *)hdbc;
+    dbc->conf = new DocumentDBConfiguration(TEXT("https://localhost:8081"), TEXT("C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="));
+    dbc->client =  new DocumentClient(*((DbcStruct*)dbc)->conf);
+    fDriverCompletion = SQL_DRIVER_COMPLETE;*/
 
-    if (szConnStrOut && pcchConnStrOut > 0)
+    if (szConnStrOut && cchConnStrOutMax > 0 && pcchConnStrOut)
     {
-        _tcscpy_s((SQLTCHAR *)szConnStrOut, cchConnStrIn, (SQLTCHAR *)szConnStrIn);
-        if (pcchConnStrOut)
-        {
-            *pcchConnStrOut = cchConnStrIn;
-        }
+        _tcscpy_s((_TCHAR *)szConnStrOut, cchConnStrOutMax, (_TCHAR *)szConnStrIn);
+        *pcchConnStrOut = _tcsnlen((_TCHAR *)szConnStrOut, cchConnStrOutMax);
     }
     
     return SQL_SUCCESS;

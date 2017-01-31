@@ -27,8 +27,7 @@ SQLRETURN  SQL_API SQLDescribeCol(SQLHSTMT StatementHandle,
 
 SQLRETURN  SQL_API SQLDisconnect(SQLHDBC ConnectionHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLError(SQLHENV EnvironmentHandle,
@@ -132,8 +131,18 @@ SQLRETURN  SQL_API SQLFetchScroll(SQLHSTMT StatementHandle,
 
 SQLRETURN  SQL_API SQLFreeHandle(SQLSMALLINT HandleType, SQLHANDLE Handle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    switch (HandleType)
+    {
+    case SQL_HANDLE_DBC:
+        delete (DbcStruct *)Handle;
+        return SQL_SUCCESS;
+    case SQL_HANDLE_ENV:
+        delete (EnvStruct *)Handle;
+        return SQL_SUCCESS;
+    default:
+        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        return SQL_ERROR;
+    }
 }
 
 SQLRETURN  SQL_API SQLFreeStmt(SQLHSTMT StatementHandle,

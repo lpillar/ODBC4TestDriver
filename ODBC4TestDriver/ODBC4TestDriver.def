@@ -3,77 +3,72 @@ EXPORTS
 	SQLAllocEnv
 	SQLAllocStmt
 	SQLAllocHandle
-	SQLDriverConnectW
 	SQLDriverConnect
-	SQLConnectW
-	SQLBrowseConnectW
+	SQLConnect
 	SQLBrowseConnect
-	SQLExecDirectW
 	SQLExecDirect
 	SQLExecute
 	SQLBindCol
 	SQLCancel
-	SQLDescribeColW
 	SQLDescribeCol
 	SQLDisconnect
 	SQLErrorW
-	SQLError
 	SQLFetch
 	SQLFreeConnect
 	SQLFreeEnv
 	SQLCancelHandle
 	SQLCloseCursor
-	SQLColAttributeW
-	SQLColumnsW
+	SQLColAttribute
+	SQLColumns
 	SQLCompleteAsync
 	SQLCopyDesc
-	SQLDataSourcesW
+	SQLDataSources
 	SQLEndTran
 	SQLFetchScroll
 	SQLFreeHandle
 	SQLFreeStmt
-	SQLGetConnectAttrW
-	SQLGetCursorNameW
+	SQLGetConnectAttr
+	SQLGetCursorName
 	SQLGetData
-	SQLGetDescFieldW
-	SQLGetDescRecW
-	SQLGetDiagFieldW
-	SQLGetDiagRecW
+	SQLGetDescField
+	SQLGetDescRec
+	SQLGetDiagField
+	SQLGetDiagRec
 	SQLGetEnvAttr
 	SQLGetFunctions
-	SQLGetInfoW
-	SQLGetStmtAttrW
-	SQLGetTypeInfoW
+	SQLGetInfo
+	SQLGetStmtAttr
+	SQLGetTypeInfo
 	SQLNumResultCols
 	SQLParamData
-	SQLPrepareW
+	SQLPrepare
 	SQLPutData
 	SQLRowCount
-	SQLSetConnectAttrW
-	SQLSetCursorNameW
-	SQLSetDescFieldW
+	SQLSetConnectAttr
+	SQLSetCursorName
+	SQLSetDescField
 	SQLSetDescRec
 	SQLSetEnvAttr
-	SQLSetStmtAttrW
-	SQLSpecialColumnsW
-	SQLStatisticsW
-	SQLTablesW
+	SQLSetStmtAttr
+	SQLSpecialColumns
+	SQLStatistics
+	SQLTables
 	SQLTransact
 	SQLBulkOperations
-	SQLColAttributesW
-	SQLColumnPrivilegesW
+	SQLColAttributes
+	SQLColumnPrivileges
 	SQLDescribeParam
 	SQLExtendedFetch
-	SQLForeignKeysW
+	SQLForeignKeys
 	SQLMoreResults
-	SQLNativeSqlW
+	SQLNativeSql
 	SQLNumParams
 	SQLParamOptions
-	SQLPrimaryKeysW
-	SQLProcedureColumnsW
-	SQLProceduresW
+	SQLPrimaryKeys
+	SQLProcedureColumns
+	SQLProcedures
 	SQLSetPos
-	SQLTablePrivilegesW
-	SQLDriversW
+	SQLTablePrivileges
+	SQLDrivers
 	SQLBindParameter
 	DLLMain
