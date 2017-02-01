@@ -1,6 +1,6 @@
 #include "Globals.h"
 
-SQLRETURN  SQL_API SQLExecDirect
+SQLRETURN  SQL_API SQLExecDirectW
 (
     SQLHSTMT StatementHandle,
     _In_reads_opt_(TextLength) SQLCHAR* StatementText,

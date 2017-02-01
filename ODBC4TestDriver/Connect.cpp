@@ -1,6 +1,6 @@
 #include "Globals.h"
 
-SQLRETURN SQL_API SQLDriverConnect(
+SQLRETURN SQL_API SQLDriverConnectW(
     SQLHDBC            hdbc,
     SQLHWND            hwnd,
     _In_reads_(cchConnStrIn)
@@ -27,7 +27,7 @@ SQLRETURN SQL_API SQLDriverConnect(
     return SQL_SUCCESS;
 }
 
-SQLRETURN  SQL_API SQLConnect(SQLHDBC ConnectionHandle,
+SQLRETURN  SQL_API SQLConnectW(SQLHDBC ConnectionHandle,
     _In_reads_(NameLength1) SQLCHAR *ServerName, SQLSMALLINT NameLength1,
     _In_reads_(NameLength2) SQLCHAR *UserName, SQLSMALLINT NameLength2,
     _In_reads_(NameLength3) SQLCHAR *Authentication, SQLSMALLINT NameLength3)
@@ -36,7 +36,7 @@ SQLRETURN  SQL_API SQLConnect(SQLHDBC ConnectionHandle,
     return SQL_ERROR;
 }
 
-SQLRETURN SQL_API SQLBrowseConnect(
+SQLRETURN SQL_API SQLBrowseConnectW(
     SQLHDBC            hdbc,
     _In_reads_(cchConnStrIn)
     SQLCHAR           *szConnStrIn,
