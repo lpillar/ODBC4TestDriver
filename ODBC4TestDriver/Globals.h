@@ -21,10 +21,28 @@ struct DbcStruct
 {
     DocumentDBConfiguration *conf;
     DocumentClient *client;
+    shared_ptr<Database> database;
+    shared_ptr<Collection> collection;
     SQLINTEGER ansiApp;
+
+    ~DbcStruct()
+    {
+        delete conf, client;
+    }
 };
 
 struct EnvStruct
 {
 
 };
+
+inline shared_ptr<wstring> MakeWide(string s)
+{
+    int length = MultiByteToWideChar(CP_ACP, 0, s.c_str(), -1, NULL, 0);
+    wchar_t *wide = new wchar_t[length];
+    MultiByteToWideChar(CP_ACP, 0, s.c_str(), -1, wide, length);
+    wstring ret(wide);
+    delete wide;
+
+    return make_shared<wstring>(ret);
+}
