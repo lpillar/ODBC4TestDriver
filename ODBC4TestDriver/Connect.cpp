@@ -31,6 +31,7 @@ SQLRETURN SQL_API SQLDriverConnectW(
             if (db->id() == *MakeWide("test1"))
             {
                 resourceId = db->resource_id();
+                break;
             }
         }
         if (resourceId.length() == 0)
@@ -48,6 +49,7 @@ SQLRETURN SQL_API SQLDriverConnectW(
             if (col->id() == *MakeWide("collection1"))
             {
                 resourceId = col->resource_id();
+                break;
             }
         }
         if (resourceId.length() == 0)
