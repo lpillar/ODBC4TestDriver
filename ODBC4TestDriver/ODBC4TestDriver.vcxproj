@@ -22,7 +22,7 @@
     <ProjectGuid>{A0F4F3B8-9118-4C17-8CFC-6ABA70C9E842}</ProjectGuid>
     <RootNamespace>TestDriver</RootNamespace>
     <ProjectName>ODBC4TestDriver</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
