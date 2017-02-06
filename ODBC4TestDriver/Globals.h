@@ -17,6 +17,11 @@ using namespace web::json;
 
 void TestTrace(LPCTSTR s);
 
+struct EnvStruct
+{
+
+};
+
 struct DbcStruct
 {
     DocumentDBConfiguration *conf;
@@ -31,10 +36,15 @@ struct DbcStruct
     }
 };
 
-struct EnvStruct
+struct StmtStruct
 {
-
+    DbcStruct *dbc;
+    shared_ptr<wstring> statement;
+    shared_ptr<DocumentIterator> iter;
+    shared_ptr<Document> doc;
 };
+
+
 
 inline shared_ptr<wstring> MakeWide(string s)
 {
