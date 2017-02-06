@@ -22,6 +22,10 @@ SQLRETURN  SQL_API SQLAllocHandle(SQLSMALLINT HandleType,
     case SQL_HANDLE_ENV:
         *OutputHandle = new EnvStruct;
         return SQL_SUCCESS;
+    case SQL_HANDLE_STMT:
+        *OutputHandle = new StmtStruct;
+        ((StmtStruct*)(*OutputHandle))->dbc = (DbcStruct*)InputHandle;
+        return SQL_SUCCESS;
     default:
         MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
         return SQL_ERROR;

@@ -42,8 +42,29 @@ SQLRETURN  SQL_API SQLError(SQLHENV EnvironmentHandle,
 
 SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+
+    if (!stmt->iter)
+    {
+        if (stmt->doc)
+        {
+            stmt->doc.reset();
+        }
+        return SQL_ERROR;
+    }
+
+    if (stmt->iter->HasMore())
+    {
+        stmt->doc = stmt->iter->Next();
+    }
+    else
+    {
+        if (stmt->doc)
+        {
+            stmt->doc.reset();
+        }
+        return SQL_NO_DATA;
+    }
 }
 
 SQLRETURN  SQL_API SQLFreeConnect(SQLHDBC ConnectionHandle)
@@ -178,8 +199,15 @@ SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
     _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER TargetValue, SQLLEN BufferLength,
     _Out_opt_ SQLLEN *StrLen_or_IndPtr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+    if (stmt->doc)
+    {
+        return SQL_SUCCESS;
+    }
+    else
+    {
+        return SQL_ERROR;
+    }
 }
 
 SQLRETURN  SQL_API SQLGetDescField(SQLHDESC DescriptorHandle,
@@ -207,7 +235,6 @@ SQLRETURN  SQL_API SQLGetDiagField(SQLSMALLINT HandleType, SQLHANDLE Handle,
     _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER DiagInfo, SQLSMALLINT BufferLength,
     _Out_opt_ SQLSMALLINT *StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
     return SQL_ERROR;
 }
 
@@ -224,8 +251,7 @@ SQLRETURN  SQL_API SQLGetDiagRec
     SQLSMALLINT *TextLength
 )
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLGetEnvAttr(SQLHENV EnvironmentHandle,
@@ -241,6 +267,15 @@ SQLRETURN  SQL_API SQLGetFunctions(SQLHDBC ConnectionHandle,
     _Out_writes_opt_(_Inexpressible_("Buffer length pfExists points to depends on fFunction value."))
     SQLUSMALLINT *Supported)
 {
+    switch (FunctionId)
+    {
+    case SQL_API_ODBC3_ALL_FUNCTIONS:
+        *Supported = SQL_TRUE;
+        break;
+    default:
+        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        return SQL_ERROR;
+    }
     return SQL_SUCCESS;
 }
 
