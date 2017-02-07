@@ -22,6 +22,6 @@ SQLRETURN  SQL_API SQLExecDirect
 
 SQLRETURN  SQL_API SQLExecute(SQLHSTMT StatementHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLExecute not implemented"));
     return SQL_ERROR;
 }

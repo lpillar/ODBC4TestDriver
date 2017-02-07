@@ -78,7 +78,7 @@ SQLRETURN  SQL_API SQLConnect(SQLHDBC ConnectionHandle,
     _In_reads_(NameLength2) SQLCHAR *UserName, SQLSMALLINT NameLength2,
     _In_reads_(NameLength3) SQLCHAR *Authentication, SQLSMALLINT NameLength3)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLConnect not implemented."));
     return SQL_ERROR;
 }
 
@@ -93,6 +93,6 @@ SQLRETURN SQL_API SQLBrowseConnect(
     _Out_opt_
     SQLSMALLINT       *pcchConnStrOut)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLBrowseConnect not implemented"));
     return SQL_ERROR;
 }
