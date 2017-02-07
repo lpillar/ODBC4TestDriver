@@ -17,6 +17,26 @@ using namespace web::json;
 
 void TestTrace(LPCTSTR s);
 
+struct IPDStruct
+{
+
+};
+
+struct IRDStruct
+{
+
+};
+
+struct APDStruct
+{
+
+};
+
+struct ARDStruct
+{
+
+};
+
 struct EnvStruct
 {
 
@@ -39,9 +59,18 @@ struct DbcStruct
 struct StmtStruct
 {
     DbcStruct *dbc;
+    ARDStruct *ard;
+    APDStruct *apd;
+    IRDStruct *ird;
+    IPDStruct *ipd;
     shared_ptr<wstring> statement;
     shared_ptr<DocumentIterator> iter;
     shared_ptr<Document> doc;
+
+    ~StmtStruct()
+    {
+        delete ard, apd, ird, ipd;
+    }
 };
 
 
@@ -55,4 +84,15 @@ inline shared_ptr<wstring> MakeWide(string s)
     delete wide;
 
     return make_shared<wstring>(ret);
+}
+
+inline shared_ptr<string> MakeMB(wstring s)
+{
+    int length = WideCharToMultiByte(CP_ACP, 0, s.c_str(), -1, NULL, 0, NULL, NULL);
+    char *mb = new char[length];
+    WideCharToMultiByte(CP_ACP, 0, s.c_str(), -1, mb, length, NULL, NULL);
+    string ret(mb);
+    delete mb;
+
+    return make_shared<string>(ret);
 }

@@ -5,13 +5,13 @@ SQLRETURN  SQL_API SQLBindCol(SQLHSTMT StatementHandle,
     _Inout_updates_opt_(_Inexpressible_(BufferLength)) SQLPOINTER TargetValue,
     SQLLEN BufferLength, _Inout_opt_ SQLLEN *StrLen_or_Ind)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace("SQLBindCol not implemented");
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLCancel(SQLHSTMT StatementHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLCancel not implemented"));
     return SQL_ERROR;
 }
 
@@ -21,7 +21,7 @@ SQLRETURN  SQL_API SQLDescribeColW(SQLHSTMT StatementHandle,
     _Out_opt_ SQLSMALLINT *DataType, _Out_opt_ SQLULEN *ColumnSize,
     _Out_opt_ SQLSMALLINT *DecimalDigits, _Out_opt_ SQLSMALLINT *Nullable)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLDescribeCol not implemented"));
     return SQL_ERROR;
 }
 
@@ -36,7 +36,7 @@ SQLRETURN  SQL_API SQLErrorW(SQLHENV EnvironmentHandle,
     _Out_writes_opt_(BufferLength) SQLCHAR *MessageText, SQLSMALLINT BufferLength,
     _Out_opt_ SQLSMALLINT *TextLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLError not implemented"));
     return SQL_ERROR;
 }
 
@@ -56,6 +56,7 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
     if (stmt->iter->HasMore())
     {
         stmt->doc = stmt->iter->Next();
+        return SQL_SUCCESS;
     }
     else
     {
@@ -69,25 +70,25 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 
 SQLRETURN  SQL_API SQLFreeConnect(SQLHDBC ConnectionHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLFreeConnect not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLFreeEnv(SQLHENV EnvironmentHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLFreeEnv not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLCancelHandle(SQLSMALLINT HandleType, SQLHANDLE InputHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLCancelHandle not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLCloseCursor(SQLHSTMT StatementHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLCloseCursor not implemented"));
     return SQL_ERROR;
 }
 
@@ -96,7 +97,7 @@ SQLRETURN  SQL_API SQLColAttributeW(SQLHSTMT StatementHandle,
     _Out_writes_bytes_opt_(BufferLength) SQLPOINTER CharacterAttribute, SQLSMALLINT BufferLength,
     _Out_opt_ SQLSMALLINT *StringLength, _Out_opt_ SQLPOINTER NumericAttribute)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLColAttribute not implemented"));
     return SQL_ERROR;
 }
 
@@ -106,7 +107,7 @@ SQLRETURN  SQL_API SQLColumnsW(SQLHSTMT StatementHandle,
     _In_reads_opt_(NameLength3) SQLCHAR *TableName, SQLSMALLINT NameLength3,
     _In_reads_opt_(NameLength4) SQLCHAR *ColumnName, SQLSMALLINT NameLength4)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLColumns not implemented"));
     return SQL_ERROR;
 }
 
@@ -114,14 +115,14 @@ SQLRETURN SQL_API SQLCompleteAsync(SQLSMALLINT    HandleType,
     SQLHANDLE      Handle,
     _Out_ RETCODE* AsyncRetCodePtr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLCompleteAsync not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLCopyDesc(SQLHDESC SourceDescHandle,
     SQLHDESC TargetDescHandle)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLCopyDesc not implemented"));
     return SQL_ERROR;
 }
 
@@ -131,7 +132,7 @@ SQLRETURN  SQL_API SQLDataSourcesW(SQLHENV EnvironmentHandle,
     _Out_writes_opt_(BufferLength2) SQLCHAR *Description, SQLSMALLINT BufferLength2,
     _Out_opt_ SQLSMALLINT *NameLength2Ptr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLDataSources not implemented"));
     return SQL_ERROR;
 }
 
@@ -139,14 +140,14 @@ SQLRETURN  SQL_API SQLDataSourcesW(SQLHENV EnvironmentHandle,
 SQLRETURN  SQL_API SQLEndTran(SQLSMALLINT HandleType, SQLHANDLE Handle,
     SQLSMALLINT CompletionType)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLEndTran not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLFetchScroll(SQLHSTMT StatementHandle,
     SQLSMALLINT FetchOrientation, SQLLEN FetchOffset)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLFetchScroll not implemented"));
     return SQL_ERROR;
 }
 
@@ -160,8 +161,11 @@ SQLRETURN  SQL_API SQLFreeHandle(SQLSMALLINT HandleType, SQLHANDLE Handle)
     case SQL_HANDLE_ENV:
         delete (EnvStruct *)Handle;
         return SQL_SUCCESS;
+    case SQL_HANDLE_STMT:
+        delete (StmtStruct *)Handle;
+        return SQL_SUCCESS;
     default:
-        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        TestTrace(TEXT("SQLFreeHandle not implemented"));
         return SQL_ERROR;
     }
 }
@@ -169,7 +173,7 @@ SQLRETURN  SQL_API SQLFreeHandle(SQLSMALLINT HandleType, SQLHANDLE Handle)
 SQLRETURN  SQL_API SQLFreeStmt(SQLHSTMT StatementHandle,
     SQLUSMALLINT Option)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLFreeStmt not implemented"));
     return SQL_ERROR;
 }
 
@@ -177,7 +181,7 @@ SQLRETURN  SQL_API SQLGetConnectAttrW(SQLHDBC ConnectionHandle,
     SQLINTEGER Attribute, _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
     SQLINTEGER BufferLength, _Out_opt_ SQLINTEGER *StringLengthPtr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLGetConnectAttr not implemented"));
     return SQL_ERROR;
 }
 
@@ -190,7 +194,7 @@ SQLRETURN  SQL_API SQLGetCursorNameW
     SQLSMALLINT *NameLengthPtr
 )
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLGetCursorName not implemented"));
     return SQL_ERROR;
 }
 
@@ -202,6 +206,18 @@ SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
     StmtStruct *stmt = (StmtStruct*)StatementHandle;
     if (stmt->doc)
     {
+        auto v = stmt->doc->payload().as_object();
+        
+        auto it = v.begin();
+        for (int i = 0; i < ColumnNumber + 1 && it != v.end(); ++i, ++it)
+        {
+            if (i == ColumnNumber)
+            {
+                shared_ptr<string> s = MakeMB(it->second.to_string());
+                strcpy_s((char*)TargetValue, s->size() + 1, s->c_str());
+            }
+        }
+
         return SQL_SUCCESS;
     }
     else
@@ -215,7 +231,7 @@ SQLRETURN  SQL_API SQLGetDescFieldW(SQLHDESC DescriptorHandle,
     _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER Value, SQLINTEGER BufferLength,
     _Out_opt_ SQLINTEGER *StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLGetDescField not implemented"));
     return SQL_ERROR;
 }
 
@@ -226,7 +242,7 @@ SQLRETURN  SQL_API SQLGetDescRecW(SQLHDESC DescriptorHandle,
     _Out_opt_ SQLLEN     *LengthPtr, _Out_opt_ SQLSMALLINT *PrecisionPtr,
     _Out_opt_ SQLSMALLINT *ScalePtr, _Out_opt_ SQLSMALLINT *NullablePtr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLGetDescRec not implemented"));
     return SQL_ERROR;
 }
 
@@ -251,15 +267,129 @@ SQLRETURN  SQL_API SQLGetDiagRecW
     SQLSMALLINT *TextLength
 )
 {
-    return SQL_SUCCESS;
+    return SQL_NO_DATA;
 }
 
 SQLRETURN  SQL_API SQLGetEnvAttr(SQLHENV EnvironmentHandle,
     SQLINTEGER Attribute, _Out_writes_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
     SQLINTEGER BufferLength, _Out_opt_ SQLINTEGER *StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLGetEnvAttr not implemented"));
     return SQL_ERROR;
+}
+
+
+// Copied from SQLSRV32
+#define SETFUNCBIT(func) (1 << (func&0xf))
+static UWORD wCoreAPI[] =
+{   //  Original CORE APIs
+    //  SETFUNCBIT(0), |                            //  0-15
+    //  SETFUNCBIT(SQL_API_SQLALLOCCONNECT) |
+    //  SETFUNCBIT(SQL_API_SQLALLOCENV) |
+    //  SETFUNCBIT(SQL_API_SQLALLOCSTMT) |
+    SETFUNCBIT(SQL_API_SQLBINDCOL) |
+    SETFUNCBIT(SQL_API_SQLCANCEL) |
+    SETFUNCBIT(SQL_API_SQLCOLATTRIBUTE) |
+    SETFUNCBIT(SQL_API_SQLCONNECT) |
+    SETFUNCBIT(SQL_API_SQLDESCRIBECOL) |
+    SETFUNCBIT(SQL_API_SQLDISCONNECT) |
+    //  SETFUNCBIT(SQL_API_SQLERROR) |
+    SETFUNCBIT(SQL_API_SQLEXECDIRECT) |
+    SETFUNCBIT(SQL_API_SQLEXECUTE) |
+    SETFUNCBIT(SQL_API_SQLFETCH),
+    //  SETFUNCBIT(SQL_API_SQLFREECONNECT) |
+    //  SETFUNCBIT(SQL_API_SQLFREEENV),
+
+    SETFUNCBIT(SQL_API_SQLFREESTMT) |           // 16-31
+    SETFUNCBIT(SQL_API_SQLGETCURSORNAME) |
+    SETFUNCBIT(SQL_API_SQLNUMRESULTCOLS) |
+    SETFUNCBIT(SQL_API_SQLPREPARE) |
+    SETFUNCBIT(SQL_API_SQLROWCOUNT) |
+    SETFUNCBIT(SQL_API_SQLSETCURSORNAME) |
+    SETFUNCBIT(SQL_API_SQLBULKOPERATIONS),
+    //  SETFUNCBIT(SQL_API_SQLSETPARAM) |
+    //  SETFUNCBIT(SQL_API_SQLTRANSACT),
+
+    SETFUNCBIT(SQL_API_SQLCOLUMNS) |            // 32-47
+    SETFUNCBIT(SQL_API_SQLDRIVERCONNECT) |
+    SETFUNCBIT(SQL_API_SQLGETCONNECTOPTION) |
+    SETFUNCBIT(SQL_API_SQLGETDATA) |
+    SETFUNCBIT(SQL_API_SQLGETFUNCTIONS) |
+    SETFUNCBIT(SQL_API_SQLGETINFO) |
+    //  SETFUNCBIT(SQL_API_SQLGETSTMTOPTION) |
+    SETFUNCBIT(SQL_API_SQLGETTYPEINFO),
+
+    SETFUNCBIT(SQL_API_SQLPARAMDATA) |          // 48-63
+    SETFUNCBIT(SQL_API_SQLPUTDATA) |
+    SETFUNCBIT(SQL_API_SQLSETCONNECTOPTION) |
+    //  SETFUNCBIT(SQL_API_SQLSETSTMTOPTION) |
+    SETFUNCBIT(SQL_API_SQLSPECIALCOLUMNS) |
+    SETFUNCBIT(SQL_API_SQLSTATISTICS) |
+    SETFUNCBIT(SQL_API_SQLTABLES) |
+    SETFUNCBIT(SQL_API_SQLBROWSECONNECT) |
+    SETFUNCBIT(SQL_API_SQLCOLUMNPRIVILEGES) |
+    //  SETFUNCBIT(SQL_API_SQLDATASOURCES) |
+    SETFUNCBIT(SQL_API_SQLDESCRIBEPARAM) |
+    SETFUNCBIT(SQL_API_SQLEXTENDEDFETCH) |
+    SETFUNCBIT(SQL_API_SQLFOREIGNKEYS) |
+    SETFUNCBIT(SQL_API_SQLMORERESULTS) |
+    SETFUNCBIT(SQL_API_SQLNATIVESQL) |
+    SETFUNCBIT(SQL_API_SQLNUMPARAMS),
+
+    SETFUNCBIT(SQL_API_SQLPARAMOPTIONS) |       // 64-79
+    SETFUNCBIT(SQL_API_SQLPRIMARYKEYS) |
+    SETFUNCBIT(SQL_API_SQLPROCEDURECOLUMNS) |
+    SETFUNCBIT(SQL_API_SQLPROCEDURES) |
+    SETFUNCBIT(SQL_API_SQLSETPOS) |
+    SETFUNCBIT(SQL_API_SQLSETSCROLLOPTIONS) |
+    SETFUNCBIT(SQL_API_SQLTABLEPRIVILEGES) |
+    //  SETFUNCBIT(SQL_API_SQLDRIVERS) |
+    SETFUNCBIT(SQL_API_SQLBINDPARAMETER),
+    //  SETFUNCBIT(0), |
+    //  SETFUNCBIT(0), |
+    //  SETFUNCBIT(0), |
+    //  SETFUNCBIT(0), |
+    //  SETFUNCBIT(SQL_API_SQLALLOCHANDLESTD),
+};
+
+static UWORD wXOpenAPI[] =
+{   //  XOpen (ODBC 3.0) APIs
+    SETFUNCBIT(SQL_API_SQLALLOCHANDLE) |        // 992-1007
+                                                //  SETFUNCBIT(SQL_API_SQLBINDPARAM) |
+    SETFUNCBIT(SQL_API_SQLCLOSECURSOR) |
+    SETFUNCBIT(SQL_API_SQLCOPYDESC) |
+    SETFUNCBIT(SQL_API_SQLENDTRAN) |
+    SETFUNCBIT(SQL_API_SQLFREEHANDLE) |
+    SETFUNCBIT(SQL_API_SQLGETCONNECTATTR),
+
+    SETFUNCBIT(SQL_API_SQLGETDESCFIELD) |       // 1008-1023
+    SETFUNCBIT(SQL_API_SQLGETDESCREC) |
+    SETFUNCBIT(SQL_API_SQLGETDIAGFIELD) |
+    SETFUNCBIT(SQL_API_SQLGETDIAGREC) |
+    SETFUNCBIT(SQL_API_SQLGETENVATTR) |
+    SETFUNCBIT(SQL_API_SQLGETSTMTATTR) |
+    SETFUNCBIT(SQL_API_SQLSETCONNECTATTR) |
+    SETFUNCBIT(SQL_API_SQLSETDESCFIELD) |
+    SETFUNCBIT(SQL_API_SQLSETDESCREC) |
+    SETFUNCBIT(SQL_API_SQLSETENVATTR) |
+    SETFUNCBIT(SQL_API_SQLSETSTMTATTR) |
+    SETFUNCBIT(SQL_API_SQLFETCHSCROLL)
+};
+// Update a bit in functions map
+__inline void UpdateFuncBit(UWORD *lpbFunc, UWORD fFunction, BOOL f)
+{
+    UWORD uwWord;
+    UWORD uwBit;
+    LPWORD lpWord;
+
+    uwWord = fFunction >> 4; // / 16
+    uwBit = fFunction & 0xf;
+
+    lpWord = lpbFunc + uwWord;
+    if (f)
+        *lpWord |= ((UWORD)1 << uwBit);
+    else
+        *lpWord &= ~((UWORD)1 << uwBit);
 }
 
 SQLRETURN  SQL_API SQLGetFunctions(SQLHDBC ConnectionHandle,
@@ -270,10 +400,23 @@ SQLRETURN  SQL_API SQLGetFunctions(SQLHDBC ConnectionHandle,
     switch (FunctionId)
     {
     case SQL_API_ODBC3_ALL_FUNCTIONS:
-        *Supported = SQL_TRUE;
+        if (Supported)
+        {
+            memset(Supported, 0, sizeof(UWORD) * 250);
+            memcpy(Supported + (SQL_API_SQLALLOCCONNECT >> 4),
+                wCoreAPI, sizeof(wCoreAPI));
+            memcpy(Supported + (SQL_API_SQLALLOCHANDLE >> 4),
+                wXOpenAPI, sizeof(wXOpenAPI));
+            UpdateFuncBit(Supported, SQL_API_SQLSETPOS, TRUE);
+            break;
+        }
+        else
+        {
+            return SQL_ERROR;
+        }
         break;
     default:
-        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        TestTrace(TEXT("SQLGetFunctions not implemented for this case"));
         return SQL_ERROR;
     }
     return SQL_SUCCESS;
@@ -289,45 +432,68 @@ SQLRETURN  SQL_API SQLGetInfoW(SQLHDBC ConnectionHandle,
     case SQL_DRIVER_ODBC_VER:
         _tcscpy_s((TCHAR*)InfoValue, BufferLength / sizeof(TCHAR), TEXT(SQL_SPEC_STRING));
         *StringLengthPtr = (sizeof(InfoValue) + 1) * sizeof(TCHAR);
-        return SQL_SUCCESS;
+        break;
     case SQL_ASYNC_DBC_FUNCTIONS:
         *(SQLINTEGER*)InfoValue = 0;
-        return SQL_SUCCESS;
+        break;
     case SQL_ASYNC_NOTIFICATION:
         *(SQLINTEGER*)InfoValue = SQL_ASYNC_NOTIFICATION_NOT_CAPABLE;
-        return SQL_SUCCESS;
+        break;
+    case SQL_CURSOR_COMMIT_BEHAVIOR:
+    case SQL_CURSOR_ROLLBACK_BEHAVIOR:
+    case SQL_GETDATA_EXTENSIONS:
+        return SQL_ERROR;
     default:
-        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        TestTrace(TEXT("SQLGetInfo not implemented for this case"));
         return SQL_ERROR;
     }
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLGetStmtAttrW(SQLHSTMT StatementHandle,
     SQLINTEGER Attribute, _Out_writes_opt_(_Inexpressible_(BufferLength)) SQLPOINTER Value,
     SQLINTEGER BufferLength, _Out_opt_ SQLINTEGER *StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
-    return SQL_ERROR;
+    switch (Attribute)
+    {
+    case SQL_ATTR_APP_ROW_DESC:
+        *((ARDStruct**)Value) = ((StmtStruct*)StatementHandle)->ard;
+        break;
+    case SQL_ATTR_APP_PARAM_DESC:
+        *((APDStruct**)Value) = ((StmtStruct*)StatementHandle)->apd;
+        break;
+    case SQL_ATTR_IMP_ROW_DESC:
+        *((IRDStruct**)Value) = ((StmtStruct*)StatementHandle)->ird;
+        break;
+    case SQL_ATTR_IMP_PARAM_DESC:
+        *((IPDStruct**)Value) = ((StmtStruct*)StatementHandle)->ipd;
+        break;
+    default:
+        TestTrace(TEXT("SQLGetStmtAttr not implemented for this attribute"));
+        return SQL_ERROR;
+    }
+
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLGetTypeInfoW(SQLHSTMT StatementHandle,
     SQLSMALLINT DataType)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLGetTypeInfo not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLNumResultCols(SQLHSTMT StatementHandle,
     _Out_ SQLSMALLINT *ColumnCount)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLNumResultCols not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLParamData(SQLHSTMT StatementHandle,
     _Out_opt_ SQLPOINTER *Value)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLParamData not implemented"));
     return SQL_ERROR;
 }
 
@@ -338,21 +504,21 @@ SQLRETURN  SQL_API SQLPrepareW
     SQLINTEGER TextLength
 )
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLPrepare not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLPutData(SQLHSTMT StatementHandle,
     _In_reads_(_Inexpressible_(StrLen_or_Ind)) SQLPOINTER Data, SQLLEN StrLen_or_Ind)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLPutData not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLRowCount(_In_ SQLHSTMT StatementHandle,
     _Out_ SQLLEN* RowCount)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLRowCount not implemented"));
     return SQL_ERROR;
 }
 
@@ -366,7 +532,7 @@ SQLRETURN  SQL_API SQLSetConnectAttrW(SQLHDBC ConnectionHandle,
         ((DbcStruct*)ConnectionHandle)->ansiApp = (SQLINTEGER)Value;
         return SQL_SUCCESS;
     default:
-        MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        TestTrace(TEXT("SQLSetConnectAttr not implemented"));
         return SQL_ERROR;
     }
 }
@@ -378,7 +544,7 @@ SQLRETURN  SQL_API SQLSetCursorNameW
     SQLSMALLINT NameLength
 )
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLSetCursorName not implemented"));
     return SQL_ERROR;
 }
 
@@ -386,7 +552,7 @@ SQLRETURN  SQL_API SQLSetDescFieldW(SQLHDESC DescriptorHandle,
     SQLSMALLINT RecNumber, SQLSMALLINT FieldIdentifier,
     _In_reads_(_Inexpressible_(BufferLength)) SQLPOINTER Value, SQLINTEGER BufferLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLSetDescField not implemented"));
     return SQL_ERROR;
 }
 
@@ -397,7 +563,7 @@ SQLRETURN  SQL_API SQLSetDescRec(SQLHDESC DescriptorHandle,
     _Inout_updates_bytes_opt_(Length) SQLPOINTER Data, _Inout_opt_ SQLLEN *StringLength,
     _Inout_opt_ SQLLEN *Indicator)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLSetDescRec not implemented"));
     return SQL_ERROR;
 }
 
@@ -412,7 +578,7 @@ SQLRETURN  SQL_API SQLSetStmtAttrW(SQLHSTMT StatementHandle,
     SQLINTEGER Attribute, _In_reads_(_Inexpressible_(StringLength)) SQLPOINTER Value,
     SQLINTEGER StringLength)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLSetStmtAttr not implemented"));
     return SQL_ERROR;
 }
 
@@ -423,7 +589,7 @@ SQLRETURN  SQL_API SQLSpecialColumnsW(SQLHSTMT StatementHandle,
     _In_reads_opt_(NameLength3) SQLCHAR *TableName, SQLSMALLINT NameLength3,
     SQLUSMALLINT Scope, SQLUSMALLINT Nullable)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLSpecialColumns not implemented"));
     return SQL_ERROR;
 }
 
@@ -433,7 +599,7 @@ SQLRETURN  SQL_API SQLStatisticsW(SQLHSTMT StatementHandle,
     _In_reads_opt_(NameLength3) SQLCHAR *TableName, SQLSMALLINT NameLength3,
     SQLUSMALLINT Unique, SQLUSMALLINT Reserved)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLStatistics not implemented"));
     return SQL_ERROR;
 }
 
@@ -443,14 +609,14 @@ SQLRETURN  SQL_API SQLTablesW(SQLHSTMT StatementHandle,
     _In_reads_opt_(NameLength3) SQLCHAR *TableName, SQLSMALLINT NameLength3,
     _In_reads_opt_(NameLength4) SQLCHAR *TableType, SQLSMALLINT NameLength4)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLTables not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN  SQL_API SQLTransact(SQLHENV EnvironmentHandle,
     SQLHDBC ConnectionHandle, SQLUSMALLINT CompletionType)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLTransact not implemented"));
     return SQL_ERROR;
 }
 
@@ -458,7 +624,7 @@ SQLRETURN   SQL_API SQLBulkOperations(
     SQLHSTMT            StatementHandle,
     SQLSMALLINT         Operation)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLBulkOperations not implemented"));
     return SQL_ERROR;
 }
 
@@ -471,7 +637,7 @@ SQLRETURN SQL_API SQLColAttributesW(
     SQLSMALLINT       *pcbDesc,
     SQLLEN            * pfDesc)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLColAttributes not implemented"));
     return SQL_ERROR;
 }
 
@@ -490,7 +656,7 @@ SQLRETURN SQL_API SQLColumnPrivilegesW(
     SQLCHAR           *szColumnName,
     SQLSMALLINT        cchColumnName)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLColumnPrivileges not implemented"));
     return SQL_ERROR;
 }
 
@@ -506,7 +672,7 @@ SQLRETURN SQL_API SQLDescribeParam(
     _Out_opt_
     SQLSMALLINT       *pfNullable)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLDescribeParam not implemented"));
     return SQL_ERROR;
 }
 
@@ -519,7 +685,7 @@ SQLRETURN SQL_API SQLExtendedFetch(
     _Out_opt_
     SQLUSMALLINT      *rgfRowStatus)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLExtendedFetch not implemented"));
     return SQL_ERROR;
 }
 
@@ -544,14 +710,14 @@ SQLRETURN SQL_API SQLForeignKeysW(
     SQLCHAR           *szFkTableName,
     SQLSMALLINT        cchFkTableName)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLForeignKeys not implemented"));
     return SQL_ERROR;
 }
 
 SQLRETURN SQL_API SQLMoreResults(
     SQLHSTMT           hstmt)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLMoreResults not implemented"));
     return SQL_ERROR;
 }
 
@@ -565,7 +731,7 @@ SQLRETURN SQL_API SQLNativeSqlW
     SQLINTEGER        *pcbSqlStr
 )
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLNativeSql not implemented"));
     return SQL_ERROR;
 }
 
@@ -574,7 +740,7 @@ SQLRETURN SQL_API SQLNumParams(
     _Out_opt_
     SQLSMALLINT       *pcpar)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLNumParams not implemented"));
     return SQL_ERROR;
 }
 
@@ -583,7 +749,7 @@ SQLRETURN SQL_API SQLParamOptions(
     SQLULEN            crow,
     SQLULEN            *pirow)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLParamOptions not implemented"));
     return SQL_ERROR;
 }
 
@@ -599,7 +765,7 @@ SQLRETURN SQL_API SQLPrimaryKeysW(
     SQLCHAR           *szTableName,
     SQLSMALLINT        cchTableName)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLPrimaryKeys not implemented"));
     return SQL_ERROR;
 }
 
@@ -618,7 +784,7 @@ SQLRETURN SQL_API SQLProcedureColumnsW(
     SQLCHAR           *szColumnName,
     SQLSMALLINT        cchColumnName)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLProcedureColumns not implemented"));
     return SQL_ERROR;
 }
 
@@ -634,7 +800,7 @@ SQLRETURN SQL_API SQLProceduresW(
     SQLCHAR           *szProcName,
     SQLSMALLINT        cchProcName)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLProcedures not implemented"));
     return SQL_ERROR;
 }
 
@@ -644,7 +810,7 @@ SQLRETURN SQL_API SQLSetPos(
     SQLUSMALLINT       fOption,
     SQLUSMALLINT       fLock)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLSetPos not implemented"));
     return SQL_ERROR;
 }
 
@@ -660,7 +826,7 @@ SQLRETURN SQL_API SQLTablePrivilegesW(
     SQLCHAR           *szTableName,
     SQLSMALLINT        cchTableName)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLTablePrivileges not implemented"));
     return SQL_ERROR;
 }
 
@@ -678,7 +844,7 @@ SQLRETURN SQL_API SQLDriversW(
     _Out_opt_
     SQLSMALLINT       *pcchDrvrAttr)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLDrivers not implemented"));
     return SQL_ERROR;
 }
 
@@ -694,6 +860,6 @@ SQLRETURN SQL_API SQLBindParameter(
     SQLLEN             cbValueMax,
     SQLLEN             *pcbValue)
 {
-    MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+    TestTrace(TEXT("SQLBindParameter not implemented"));
     return SQL_ERROR;
 }
