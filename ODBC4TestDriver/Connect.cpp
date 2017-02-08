@@ -40,7 +40,6 @@ SQLRETURN SQL_API SQLDriverConnectW(
         }
         dbc->database = dbc->client->GetDatabase(resourceId);
 
-
         // Get the Collection
         auto collections = dbc->database->ListCollections();
         resourceId = wstring();
