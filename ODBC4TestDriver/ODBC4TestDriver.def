@@ -69,6 +69,5 @@ EXPORTS
 	SQLProcedures
 	SQLSetPos
 	SQLTablePrivileges
-	SQLDrivers
 	SQLBindParameter
 	DLLMain

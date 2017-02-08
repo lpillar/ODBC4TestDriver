@@ -17,22 +17,33 @@ using namespace web::json;
 
 void TestTrace(LPCTSTR s);
 
-struct IPDStruct
+struct DescStruct
+{
+    // SQLGetDescField functions
+    SQLRETURN GetArraySize(SQLULEN *size)           { return SQL_ERROR; }
+    SQLRETURN GetArrayStatusPtr(SQLUSMALLINT **ptr) { return SQL_ERROR; }
+    SQLRETURN GetBindOffsetPtr(SQLLEN **ptr)        { return SQL_ERROR; }
+    SQLRETURN GetBindType(SQLINTEGER *type)         { return SQL_ERROR; }
+    SQLRETURN GetCount(SQLSMALLINT *count)          { return SQL_ERROR; }
+    SQLRETURN GetAllocType(SQLSMALLINT *type)       { return SQL_ERROR; }
+};
+
+struct IPDStruct : DescStruct
+{
+    
+};
+
+struct IRDStruct : DescStruct
+{
+    shared_ptr<vector<pair<string, string>>> columns;
+};
+
+struct APDStruct : DescStruct
 {
 
 };
 
-struct IRDStruct
-{
-
-};
-
-struct APDStruct
-{
-
-};
-
-struct ARDStruct
+struct ARDStruct : DescStruct
 {
 
 };
@@ -72,8 +83,6 @@ struct StmtStruct
         delete ard, apd, ird, ipd;
     }
 };
-
-
 
 inline shared_ptr<wstring> MakeWide(string s)
 {
