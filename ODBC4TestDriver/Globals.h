@@ -2,9 +2,9 @@
 
 #include <Windows.h>
 #include <tchar.h>
+#include "sql.h"
+#include "sqlext.h"
 #include <sqlucode.h>
-
-
 #include <cpprest/json.h>
 #include <documentdbcpp\DocumentClient.h>
 #include <documentdbcpp\exceptions.h>
@@ -36,6 +36,7 @@ struct IPDStruct : DescStruct
 struct IRDStruct : DescStruct
 {
     shared_ptr<vector<pair<string, string>>> columns;
+    SQLINTEGER dynamicColumns = SQL_TRUE;
 };
 
 struct APDStruct : DescStruct
