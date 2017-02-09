@@ -499,6 +499,9 @@ SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
     case SQL_ATTR_IMP_PARAM_DESC:
         *((IPDStruct**)Value) = ((StmtStruct*)StatementHandle)->ipd;
         break;
+    case SQL_ATTR_DYNAMIC_COLUMNS:
+        *((SQLINTEGER*)Value) = ((StmtStruct*)StatementHandle)->ird->dynamicColumns;
+        break;
     default:
         TestTrace(TEXT("SQLGetStmtAttr not implemented for this attribute"));
         return SQL_ERROR;
