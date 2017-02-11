@@ -81,6 +81,8 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>E:\git\ODBC-Specification\Windows\inc;$(ProjectDir)\..\..\..\ODBC-Specification\Windows\inc</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ODBCVER=0x0400;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>ODBC4TestDriver.def</ModuleDefinitionFile>
@@ -104,6 +106,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>E:\git\ODBC-Specification\Windows\inc;$(ProjectDir)\..\..\..\ODBC-Specification\Windows\inc</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ODBCVER=0x0400;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -140,8 +144,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Globals.h" />
-    <ClInclude Include="sql.h" />
-    <ClInclude Include="sqlext.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -170,6 +172,7 @@
     <Error Condition="!Exists('..\packages\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.2.9.1\build\native\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.2.9.1\build\native\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
   </Target>
   <Target Name="AfterBuild">
-    <Copy SourceFiles="ODBC4TestDriver.ini" DestinationFolder="$(OutDir)\.." ContinueOnError="false"></Copy>
+    <Copy SourceFiles="ODBC4TestDriver.ini" DestinationFolder="$(OutDir)\.." ContinueOnError="false">
+    </Copy>
   </Target>
 </Project>
