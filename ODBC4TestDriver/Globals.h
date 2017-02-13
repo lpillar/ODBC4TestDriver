@@ -28,6 +28,8 @@ struct DescStruct
     SQLRETURN GetAllocType(SQLSMALLINT *type)       { return SQL_ERROR; }
 };
 
+enum ColumnType { str };
+
 struct IPDStruct : DescStruct
 {
     
@@ -35,7 +37,10 @@ struct IPDStruct : DescStruct
 
 struct IRDStruct : DescStruct
 {
-    shared_ptr<vector<pair<string, string>>> columns;
+    // Type, Name, Value
+    shared_ptr<vector<tuple<ColumnType, string, string>>> columns;
+    bool moreNewColumns;
+    int firstNewColumn;
     SQLINTEGER dynamicColumns = SQL_TRUE;
 };
 

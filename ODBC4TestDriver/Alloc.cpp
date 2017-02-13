@@ -28,6 +28,8 @@ SQLRETURN  SQL_API SQLAllocHandle(SQLSMALLINT HandleType,
         ((StmtStruct*)(*OutputHandle))->ard = new ARDStruct;
         ((StmtStruct*)(*OutputHandle))->apd = new APDStruct;
         ((StmtStruct*)(*OutputHandle))->ird = new IRDStruct;
+        ((StmtStruct*)(*OutputHandle))->ird->columns.reset(new vector<tuple<ColumnType, string, string>>);
+        ((StmtStruct*)(*OutputHandle))->ird->columns->push_back(make_tuple<ColumnType, string, string>(str, "Bookmark", "Bookmark"));
         ((StmtStruct*)(*OutputHandle))->ipd = new IPDStruct;
         return SQL_SUCCESS;
     default:
