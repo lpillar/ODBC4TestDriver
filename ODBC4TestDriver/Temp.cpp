@@ -56,14 +56,41 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
     {
         stmt->doc = stmt->iter->Next();
         auto v = stmt->doc->payload().as_object();
-        stmt->ird->columns.reset(new vector<pair<string, string>>);
-        stmt->ird->columns->push_back(make_pair("Bookmark1", "Bookmark2"));
-        for (auto it = v.begin(); it != v.end(); ++it)
+        stmt->ird->firstNewColumn = stmt->ird->columns->size();
+
+        for (auto i : *stmt->ird->columns)
         {
-            stmt->ird->columns->push_back(make_pair(*MakeMB(it->first), *MakeMB(it->second.to_string())));
+            get<2>(i) = "";
         }
 
-        return SQL_SUCCESS;
+        for (auto it = v.begin(); it != v.end(); ++it)
+        {
+            bool found = false;
+            for (auto it2 = stmt->ird->columns->begin(); it2 != stmt->ird->columns->end(); ++it2)
+            {
+                if (*MakeMB(it->first) == get<1>(*it2)) // Not currently checking type, just title
+                {
+                    get<2>(*it2) = *(MakeMB(it->second.to_string()));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                stmt->ird->columns->push_back(
+                    tuple<ColumnType, string, string>(str, *MakeMB(it->first), *MakeMB(it->second.to_string())));
+            }
+        }
+
+        if (stmt->ird->firstNewColumn > stmt->ird->columns->size())
+        {
+            stmt->ird->moreNewColumns = true;
+            return SQL_DATA_AVAILABLE;
+        }
+        else
+        {
+            return SQL_SUCCESS;
+        }
     }
     else
     {
@@ -224,7 +251,7 @@ SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
     {
         if (stmt->ird->columns->size() >= ColumnNumber)
         {
-            string &s = stmt->ird->columns->at(ColumnNumber).second;
+            string &s = get<2>(stmt->ird->columns->at(ColumnNumber));
             strcpy_s((char*)TargetValue, min(s.size() + 1, BufferLength), s.c_str());
             ((char*)TargetValue)[min(BufferLength - 1, s.size())] = 0;
 
@@ -890,4 +917,28 @@ SQLRETURN SQL_API SQLBindParameter(
 {
     TestTrace(TEXT("SQLBindParameter not implemented"));
     return SQL_ERROR;
+}
+
+SQLRETURN SQLNextColumn(
+    SQLHSTMT StatementHandle,
+    SQLUSMALLINT* Col_or_Param_Num)
+{
+    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+    if (stmt->ird->moreNewColumns)
+    {
+        *Col_or_Param_Num = stmt->ird->firstNewColumn++;
+        if (stmt->ird->firstNewColumn >= stmt->ird->columns->size() - 1)
+        {
+            stmt->ird->moreNewColumns = false;
+            return SQL_SUCCESS;
+        }
+        else
+        {
+            return SQL_DATA_AVAILABLE;
+        }
+    }
+    else
+    {
+        return SQL_ERROR;
+    }
 }
