@@ -39,7 +39,6 @@ struct IRDStruct : DescStruct
 {
     // Type, Name, Value
     shared_ptr<vector<tuple<ColumnType, string, string>>> columns;
-    bool moreNewColumns;
     int firstNewColumn;
     SQLINTEGER dynamicColumns = SQL_TRUE;
 };

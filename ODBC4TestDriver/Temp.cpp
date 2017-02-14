@@ -20,8 +20,34 @@ SQLRETURN  SQL_API SQLDescribeCol(SQLHSTMT StatementHandle,
     _Out_opt_ SQLSMALLINT *DataType, _Out_opt_ SQLULEN *ColumnSize,
     _Out_opt_ SQLSMALLINT *DecimalDigits, _Out_opt_ SQLSMALLINT *Nullable)
 {
-    TestTrace(TEXT("SQLDescribeCol not implemented"));
-    return SQL_ERROR;
+    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+    if (ColumnNumber == 0 || // Bookmark column
+        stmt->ird == NULL ||
+        ColumnNumber >= stmt->ird->columns->size() ||
+        stmt->ird->firstNewColumn <= ColumnNumber) // Hasn't been grabbed by SQLNextColumn yet
+    {
+        return SQL_ERROR;
+    }
+    else
+    {
+        string &s = get<1>(stmt->ird->columns->at(ColumnNumber));
+        if (ColumnName)
+        {
+            
+            strcpy_s((char*)ColumnName, min(s.size() + 1, BufferLength), s.c_str());
+            ((char*)ColumnName)[min(BufferLength - 1, s.size())] = 0;
+        }
+        if (NameLength)
+        {
+            *NameLength = strlen(s.c_str());
+        }
+
+        if (DataType)
+        {
+            *DataType = SQL_C_CHAR;
+        }
+        return SQL_SUCCESS;
+    }
 }
 
 SQLRETURN  SQL_API SQLDisconnect(SQLHDBC ConnectionHandle)
@@ -82,9 +108,8 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
             }
         }
 
-        if (stmt->ird->firstNewColumn > stmt->ird->columns->size())
+        if (stmt->ird->firstNewColumn < stmt->ird->columns->size())
         {
-            stmt->ird->moreNewColumns = true;
             return SQL_DATA_AVAILABLE;
         }
         else
@@ -247,6 +272,11 @@ SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
 
     StmtStruct *stmt = (StmtStruct*)StatementHandle;
 
+    if (stmt->ird->firstNewColumn <= ColumnNumber)
+    {
+        return SQL_ERROR;
+    }
+
     if (stmt->ird && stmt->ird->columns)
     {
         if (stmt->ird->columns->size() >= ColumnNumber)
@@ -287,6 +317,12 @@ SQLRETURN  SQL_API SQLGetDescField(SQLHDESC DescriptorHandle,
         return desc->GetCount((SQLSMALLINT*)Value);
     case SQL_DESC_ALLOC_TYPE:
         return desc->GetAllocType((SQLSMALLINT*)Value);
+    case SQL_DESC_ROWS_PROCESSED_PTR:
+        if (Value)
+        {
+            *(SQLINTEGER*)Value = 0; // Temporary hack
+        }
+        return SQL_SUCCESS;
     default:
         TestTrace(TEXT("SQLGetDescField not implemented for this value"));
         return SQL_ERROR;
@@ -402,7 +438,8 @@ static UWORD wCoreAPI[] =
     SETFUNCBIT(SQL_API_SQLSETSCROLLOPTIONS) |
     SETFUNCBIT(SQL_API_SQLTABLEPRIVILEGES) |
     //  SETFUNCBIT(SQL_API_SQLDRIVERS) |
-    SETFUNCBIT(SQL_API_SQLBINDPARAMETER),
+    SETFUNCBIT(SQL_API_SQLBINDPARAMETER) |
+    SETFUNCBIT(SQL_API_SQLNEXTCOLUMN),
     //  SETFUNCBIT(0), |
     //  SETFUNCBIT(0), |
     //  SETFUNCBIT(0), |
@@ -466,6 +503,7 @@ SQLRETURN  SQL_API SQLGetFunctions(SQLHDBC ConnectionHandle,
             memcpy(Supported + (SQL_API_SQLALLOCHANDLE >> 4),
                 wXOpenAPI, sizeof(wXOpenAPI));
             UpdateFuncBit(Supported, SQL_API_SQLSETPOS, TRUE);
+            UpdateFuncBit(Supported, SQL_API_SQLNEXTCOLUMN, TRUE);
             break;
         }
         else
@@ -919,17 +957,15 @@ SQLRETURN SQL_API SQLBindParameter(
     return SQL_ERROR;
 }
 
-SQLRETURN SQLNextColumn(
-    SQLHSTMT StatementHandle,
-    SQLUSMALLINT* Col_or_Param_Num)
+SQLRETURN SQL_API SQLNextColumn(SQLHSTMT StatementHandle,
+                          _Out_ SQLUSMALLINT *ColumnCount)
 {
     StmtStruct *stmt = (StmtStruct*)StatementHandle;
-    if (stmt->ird->moreNewColumns)
+    if (stmt->ird->firstNewColumn < stmt->ird->columns->size())
     {
-        *Col_or_Param_Num = stmt->ird->firstNewColumn++;
-        if (stmt->ird->firstNewColumn >= stmt->ird->columns->size() - 1)
+        *ColumnCount = stmt->ird->firstNewColumn++;
+        if (stmt->ird->firstNewColumn == stmt->ird->columns->size())
         {
-            stmt->ird->moreNewColumns = false;
             return SQL_SUCCESS;
         }
         else
