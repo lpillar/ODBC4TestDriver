@@ -71,3 +71,4 @@ EXPORTS
 	SQLTablePrivileges
 	SQLBindParameter
 	DLLMain
+	SQLNextColumn

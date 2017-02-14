@@ -30,6 +30,7 @@ SQLRETURN  SQL_API SQLAllocHandle(SQLSMALLINT HandleType,
         ((StmtStruct*)(*OutputHandle))->ird = new IRDStruct;
         ((StmtStruct*)(*OutputHandle))->ird->columns.reset(new vector<tuple<ColumnType, string, string>>);
         ((StmtStruct*)(*OutputHandle))->ird->columns->push_back(make_tuple<ColumnType, string, string>(str, "Bookmark", "Bookmark"));
+        ((StmtStruct*)(*OutputHandle))->ird->firstNewColumn = 1;
         ((StmtStruct*)(*OutputHandle))->ipd = new IPDStruct;
         return SQL_SUCCESS;
     default:
