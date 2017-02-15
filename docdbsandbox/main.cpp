@@ -28,4 +28,11 @@ int main()
     document_family[L"FirstName"] = value::string(L"Lucy");
     document_family[L"LastName"] = value::string(L"Wakefield");
     doc = coll->CreateDocument(document_family);
+
+    value document_2;
+    document_2[L"id"] = value::string(L"JohnFamily");
+    document_2[L"FirstName"] = value::string(L"John");
+    document_2[L"City"] = value::string(L"Waunakee");
+    document_2[L"State"] = value::string(L"Wisconsin");
+    doc = coll->CreateDocument(document_2);
 }
