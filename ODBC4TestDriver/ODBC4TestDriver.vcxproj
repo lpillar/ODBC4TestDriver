@@ -135,11 +135,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Alloc.cpp" />
-    <ClCompile Include="Connect.cpp" />
+    <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="Descriptor.cpp" />
+    <ClCompile Include="Diagnostics.cpp" />
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="Execute.cpp" />
-    <ClCompile Include="Temp.cpp" />
-    <ClCompile Include="Trace.cpp" />
+    <ClCompile Include="Environment.cpp" />
+    <ClCompile Include="GetFunctions.cpp" />
+    <ClCompile Include="Statement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ODBC4TestDriver.def" />

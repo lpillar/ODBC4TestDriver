@@ -38,3 +38,22 @@ SQLRETURN  SQL_API SQLAllocHandle(SQLSMALLINT HandleType,
         return SQL_ERROR;
     }
 }
+
+SQLRETURN  SQL_API SQLFreeHandle(SQLSMALLINT HandleType, SQLHANDLE Handle)
+{
+    switch (HandleType)
+    {
+    case SQL_HANDLE_DBC:
+        delete (DbcStruct *)Handle;
+        return SQL_SUCCESS;
+    case SQL_HANDLE_ENV:
+        delete (EnvStruct *)Handle;
+        return SQL_SUCCESS;
+    case SQL_HANDLE_STMT:
+        delete (StmtStruct *)Handle;
+        return SQL_SUCCESS;
+    default:
+        TestTrace(TEXT("SQLFreeHandle not implemented"));
+        return SQL_ERROR;
+    }
+}
