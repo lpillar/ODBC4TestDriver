@@ -95,7 +95,7 @@ SQLRETURN SQL_API SQLDriverConnect(
     if (szConnStrOut && cchConnStrOutMax > 0 && pcchConnStrOut)
     {
         _tcscpy_s((_TCHAR *)szConnStrOut, cchConnStrOutMax, (_TCHAR *)szConnStrIn);
-        *pcchConnStrOut = _tcsnlen((_TCHAR *)szConnStrOut, cchConnStrOutMax);
+        *pcchConnStrOut = (SQLSMALLINT)_tcsnlen((_TCHAR *)szConnStrOut, cchConnStrOutMax);
     }
 
     return SQL_SUCCESS;
@@ -132,9 +132,11 @@ SQLRETURN  SQL_API SQLGetInfo(SQLHDBC ConnectionHandle,
     case SQL_ASYNC_NOTIFICATION:
         *(SQLINTEGER*)InfoValue = SQL_ASYNC_NOTIFICATION_NOT_CAPABLE;
         break;
+    case SQL_GETDATA_EXTENSIONS:
+        *(SQLINTEGER*)InfoValue = SQL_GD_ANY_COLUMN & SQL_GD_ANY_ORDER;
+        break;
     case SQL_CURSOR_COMMIT_BEHAVIOR:
     case SQL_CURSOR_ROLLBACK_BEHAVIOR:
-    case SQL_GETDATA_EXTENSIONS:
         return SQL_ERROR;
     default:
         TestTrace(TEXT("SQLGetInfo not implemented for this case"));

@@ -115,31 +115,32 @@ SQLRETURN  SQL_API SQLDescribeCol(SQLHSTMT StatementHandle,
     _Out_opt_ SQLSMALLINT *DataType, _Out_opt_ SQLULEN *ColumnSize,
     _Out_opt_ SQLSMALLINT *DecimalDigits, _Out_opt_ SQLSMALLINT *Nullable)
 {
-    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+    IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
     if (ColumnNumber == 0 || // Bookmark column
-        stmt->ird == NULL ||
-        ColumnNumber >= stmt->ird->columns->size() ||
-        stmt->ird->firstNewColumn <= ColumnNumber) // Hasn't been grabbed by SQLNextColumn yet
+        ird == NULL ||
+        ColumnNumber >= ird->columns.size() ||
+        ird->currentColumn <= ColumnNumber) // Hasn't been fetched or SQLNextColumn-ed yet
     {
         return SQL_ERROR;
     }
     else
     {
-        string &s = get<1>(stmt->ird->columns->at(ColumnNumber));
+        CellStruct &cell = ird->columns[ColumnNumber];
+
         if (ColumnName)
         {
 
-            strcpy_s((char*)ColumnName, min(s.size() + 1, BufferLength), s.c_str());
-            ((char*)ColumnName)[min(BufferLength - 1, s.size())] = 0;
+            strcpy_s((char*)ColumnName, min(cell.name.size() + 1, (SQLUSMALLINT)BufferLength), cell.name.c_str());
+            ((char*)ColumnName)[min((SQLUSMALLINT)(BufferLength - 1), cell.name.size())] = 0; // Set null terminator if string truncated
         }
         if (NameLength)
         {
-            *NameLength = strlen(s.c_str());
+            *NameLength = (SQLUSMALLINT)cell.name.size() + 1; // Add one for numm terminator
         }
 
         if (DataType)
         {
-            *DataType = SQL_C_CHAR;
+            *DataType = cell.type;
         }
         return SQL_SUCCESS;
     }
@@ -189,7 +190,8 @@ SQLRETURN  SQL_API SQLExecDirect
     stmt->statement = MakeWide((char*)StatementText);
     try
     {
-        stmt->iter = stmt->dbc->collection->QueryDocuments(*(stmt->statement));
+        stmt->ird->resetRow();
+        stmt->ird->rowIter = stmt->dbc->collection->QueryDocuments(*(stmt->statement));
     }
     catch (DocumentDBRuntimeException e)
     {
@@ -219,48 +221,45 @@ SQLRETURN SQL_API SQLExtendedFetch(
 
 SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 {
-    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+    IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
 
-    if (!stmt->iter)
+    if (!ird->rowIter || // There must be rows available from Execute or something similar
+        ird->incompleteFetch) // Previous fetch must complete before new one - call SQLNextColumn
     {
-        if (stmt->doc)
-        {
-            stmt->doc.reset();
-        }
-        return SQL_ERROR;
+        return SQL_ERROR; // HY010 Function Sequence Error
     }
 
-    if (stmt->iter->HasMore())
+    if (ird->rowIter->HasMore())
     {
-        stmt->doc = stmt->iter->Next();
-        auto v = stmt->doc->payload().as_object();
-        stmt->ird->firstNewColumn = stmt->ird->columns->size();
+        ird->doc = ird->rowIter->Next();
+        ird->resetRow();
 
-        for (auto it2 = stmt->ird->columns->begin(); it2 != stmt->ird->columns->end(); ++it2)
-        {
-            get<2>(*it2) = "";
-        }
-
-        for (auto it = v.begin(); it != v.end(); ++it)
+        for (auto it = ird->doc->payload().as_object().begin(); it != ird->doc->payload().as_object().end(); ++it)
         {
             bool found = false;
-            for (auto it2 = stmt->ird->columns->begin(); it2 != stmt->ird->columns->end(); ++it2)
+            for (size_t i = 0; i < ird->columns.size(); ++i)
             {
-                if (*MakeMB(it->first) == get<1>(*it2)) // Not currently checking type, just title
+                if (*MakeMB(it->first) == ird->columns[i].name) // Not currently checking type, just title
                 {
-                    get<2>(*it2) = *(MakeMB(it->second.to_string()));
+                    if (ird->columns[i].bound)
+                    {
+                        ird->columns[i].value = *(MakeMB(it->second.to_string()));
+                        // TODO: Add SQL_DATA_AT_FETCH code here for long buffers
+                    }
                     found = true;
+                    ird->columns[i].notInThisRow = false;
                     break;
                 }
             }
             if (!found)
             {
-                stmt->ird->columns->push_back(
-                    tuple<ColumnType, string, string>(str, *MakeMB(it->first), *MakeMB(it->second.to_string())));
+                ird->unprocessedColumns.push_back(CellStruct(*MakeMB(it->first), SQL_C_CHAR, false, *(MakeMB(it->second.to_string()))));
+                ird->currentColumn = (SQLUSMALLINT)ird->columns.size();
+                ird->incompleteFetch = true;
             }
         }
 
-        if (stmt->ird->firstNewColumn < stmt->ird->columns->size())
+        if (ird->incompleteFetch)
         {
             return SQL_DATA_AVAILABLE;
         }
@@ -271,12 +270,7 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
     }
     else
     {
-        if (stmt->doc)
-        {
-            stmt->doc.reset();
-        }
-        stmt->iter.reset();
-        stmt->ird->columns.reset();
+        ird->resetRow();
         return SQL_NO_DATA;
     }
 }
@@ -344,35 +338,50 @@ SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
         return SQL_ERROR;
     }
 
-    StmtStruct *stmt = (StmtStruct*)StatementHandle;
+    IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
 
-    if (stmt->ird->firstNewColumn <= ColumnNumber)
+    if (!ird)
     {
+        return SQL_ERROR; // invalid handle
+    }
+    if (ird->incompleteFetch && ird->currentColumn <= ColumnNumber)
+    {
+        return SQL_ERROR; // This column has not been processed by SQLNextColumn yet
+    }
+    if (ird->columns.size() <= ColumnNumber)
+    {
+        return SQL_ERROR; // Out of bounds
+    }
+
+    CellStruct &cell = ird->columns[ColumnNumber];
+
+    if (cell.notInThisRow)
+    {
+        if (StrLen_or_IndPtr)
+        {
+            *StrLen_or_IndPtr = SQL_DATA_UNAVAILABLE;
+        }
         return SQL_ERROR;
     }
-
-    if (stmt->ird && stmt->ird->columns)
+    else
     {
-        if (stmt->ird->columns->size() >= ColumnNumber)
+        strcpy_s((char*)TargetValue, min(cell.value.size() + 1, (SQLULEN)BufferLength), cell.value.c_str());
+        ((char*)TargetValue)[min((SQLULEN)BufferLength - 1, cell.value.size())] = 0;
+        if (StrLen_or_IndPtr)
         {
-            string &s = get<2>(stmt->ird->columns->at(ColumnNumber));
-            strcpy_s((char*)TargetValue, min(s.size() + 1, BufferLength), s.c_str());
-            ((char*)TargetValue)[min(BufferLength - 1, s.size())] = 0;
+            *StrLen_or_IndPtr = min((SQLUINTEGER)BufferLength, cell.value.size() + 1);
+        }
 
-            if (*((char*)TargetValue) == 0)
-            {
-                return SQL_NO_DATA_FOUND;
-            }
-
-            if (StrLen_or_IndPtr)
-            {
-                *StrLen_or_IndPtr = min(BufferLength, s.size() + 1);
-            }
+        if (*((char*)TargetValue) == 0)
+        {
+            return SQL_NO_DATA_FOUND;
+        }
+        else
+        {
             return SQL_SUCCESS;
         }
-    }
 
-    return SQL_ERROR;
+    }
 }
 
 SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
@@ -394,7 +403,8 @@ SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
         *((IPDStruct**)Value) = ((StmtStruct*)StatementHandle)->ipd;
         break;
     case SQL_ATTR_DYNAMIC_COLUMNS:
-        *((SQLINTEGER*)Value) = ((StmtStruct*)StatementHandle)->ird->dynamicColumns;
+        // Currently hard-coded to support dynamic columns
+        *((SQLINTEGER*)Value) = SQL_TRUE;
         break;
     default:
         TestTrace(TEXT("SQLGetStmtAttr not implemented for this attribute"));
@@ -421,22 +431,39 @@ SQLRETURN SQL_API SQLMoreResults(
 SQLRETURN SQL_API SQLNextColumn(SQLHSTMT StatementHandle,
     _Out_ SQLUSMALLINT *ColumnCount)
 {
-    StmtStruct *stmt = (StmtStruct*)StatementHandle;
-    if (stmt->ird->firstNewColumn < stmt->ird->columns->size())
+    if (!StatementHandle || !((StmtStruct*)StatementHandle)->ird)
     {
-        *ColumnCount = stmt->ird->firstNewColumn++;
-        if (stmt->ird->firstNewColumn == stmt->ird->columns->size())
+        return SQL_INVALID_HANDLE;
+    }
+
+    IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
+    if (!ird->incompleteFetch || ird->currentColumn >= ird->columns.size() || ird->currentColumn == 0)
+    {
+        return SQL_ERROR; // HY010
+    }
+
+    if (ird->currentColumn < ird->columns.size()) // This is a variable length column
+    {
+        return SQL_ERROR; // How did this happen? It's not implemented yet.
+    }
+    else // This is a new dynamic column
+    {
+        if (ird->unprocessedColumns.empty())
         {
+            return SQL_ERROR; // How did this happen?
+        }
+        *ColumnCount = ird->currentColumn++;
+        ird->columns.push_back(ird->unprocessedColumns.front());
+        ird->unprocessedColumns.erase(ird->unprocessedColumns.begin());
+        if (ird->unprocessedColumns.empty())
+        {
+            ird->incompleteFetch = false;
             return SQL_SUCCESS;
         }
         else
         {
             return SQL_DATA_AVAILABLE;
         }
-    }
-    else
-    {
-        return SQL_ERROR;
     }
 }
 
@@ -452,14 +479,14 @@ SQLRETURN SQL_API SQLNumParams(
 SQLRETURN  SQL_API SQLNumResultCols(SQLHSTMT StatementHandle,
     _Out_ SQLSMALLINT *ColumnCount)
 {
-    if (!StatementHandle)
+    if (!StatementHandle || !((StmtStruct*)StatementHandle)->ird)
     {
         return SQL_INVALID_HANDLE;
     }
 
-    if (ColumnCount && ((StmtStruct*)StatementHandle)->ird && ((StmtStruct*)StatementHandle)->ird->columns)
+    if (ColumnCount)
     {
-        *ColumnCount = ((StmtStruct*)StatementHandle)->ird->columns->size() - 1; // Subtract 1 for bookmark col
+        *ColumnCount = (SQLSMALLINT)(((StmtStruct*)StatementHandle)->ird->columns.size() - 1); // Subtract 1 for bookmark col
         return SQL_SUCCESS;
     }
     else
