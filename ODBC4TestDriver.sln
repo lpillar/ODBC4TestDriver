@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ODBC4TestDriver", "ODBC4TestDriver\ODBC4TestDriver.vcxproj", "{A0F4F3B8-9118-4C17-8CFC-6ABA70C9E842}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ODBC4TestDriverTestSetup", "docdbsandbox\docdbsandbox.vcxproj", "{8BEA09F0-27E0-47A6-95D5-5A517D6768D6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ODBC4TestSetup", "ODBC4TestSetup\ODBC4TestSetup.vcxproj", "{8BEA09F0-27E0-47A6-95D5-5A517D6768D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
