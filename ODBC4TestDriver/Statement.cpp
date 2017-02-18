@@ -231,10 +231,11 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 
     if (ird->rowIter->HasMore())
     {
-        ird->doc = ird->rowIter->Next();
         ird->resetRow();
+        ird->doc = ird->rowIter->Next();
+        auto v = ird->doc->payload().as_object();
 
-        for (auto it = ird->doc->payload().as_object().begin(); it != ird->doc->payload().as_object().end(); ++it)
+        for (auto it = v.begin(); it != v.end(); ++it)
         {
             bool found = false;
             for (size_t i = 0; i < ird->columns.size(); ++i)
@@ -437,7 +438,7 @@ SQLRETURN SQL_API SQLNextColumn(SQLHSTMT StatementHandle,
     }
 
     IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
-    if (!ird->incompleteFetch || ird->currentColumn >= ird->columns.size() || ird->currentColumn == 0)
+    if (!ird->incompleteFetch)
     {
         return SQL_ERROR; // HY010
     }
