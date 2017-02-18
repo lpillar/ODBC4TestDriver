@@ -43,7 +43,7 @@ struct CellStruct
     bool notInThisRow;
 
     CellStruct(string _name, SQLSMALLINT _type = SQL_C_CHAR, bool _bound = false,
-               string _value = NULL, bool _dataAtFetch = false, bool _notInThisRow = false)
+               string _value = "", bool _dataAtFetch = false, bool _notInThisRow = false)
     {
         name = _name;
         type = _type;
