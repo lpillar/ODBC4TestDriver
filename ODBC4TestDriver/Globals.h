@@ -28,19 +28,56 @@ struct DescStruct
     SQLRETURN GetAllocType(SQLSMALLINT *type)       { return SQL_ERROR; }
 };
 
-enum ColumnType { str };
-
 struct IPDStruct : DescStruct
 {
     
 };
 
+struct CellStruct
+{
+    SQLSMALLINT type;
+    string name;
+    string value;
+    bool bound;
+    bool dataAtFetch;
+    bool notInThisRow;
+
+    CellStruct(string _name, SQLSMALLINT _type = SQL_C_CHAR, bool _bound = false,
+               string _value = NULL, bool _dataAtFetch = false, bool _notInThisRow = false)
+    {
+        name = _name;
+        type = _type;
+        bound = _bound;
+        value = _value;
+        dataAtFetch = _dataAtFetch;
+        notInThisRow = _notInThisRow;
+    }
+};
+
 struct IRDStruct : DescStruct
 {
-    // Type, Name, Value
-    shared_ptr<vector<tuple<ColumnType, string, string>>> columns;
-    int firstNewColumn;
-    SQLINTEGER dynamicColumns = SQL_TRUE;
+    shared_ptr<DocumentIterator> rowIter;
+    vector<CellStruct> columns;
+    shared_ptr<Document> doc;
+    vector<CellStruct> unprocessedColumns;
+    SQLUSMALLINT currentColumn; // 0 is bookmark; subtract one to index into doc->payload()
+    bool incompleteFetch;
+
+    void resetRow()
+    {
+        incompleteFetch = false;
+        currentColumn = 0;
+        if (doc)
+        {
+            doc.reset();
+        }
+        unprocessedColumns.clear();
+        for (auto c : columns)
+        {
+            c.value.clear();
+            c.notInThisRow = true;
+        }
+    }
 };
 
 struct APDStruct : DescStruct
@@ -80,8 +117,7 @@ struct StmtStruct
     IRDStruct *ird;
     IPDStruct *ipd;
     shared_ptr<wstring> statement;
-    shared_ptr<DocumentIterator> iter;
-    shared_ptr<Document> doc;
+    //bool supportsDynamicColumns; - currently hard-coded to support dynamic
 
     ~StmtStruct()
     {
