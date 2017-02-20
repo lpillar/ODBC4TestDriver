@@ -12,8 +12,7 @@ SQLRETURN  SQL_API SQLDataSources(SQLHENV EnvironmentHandle,
 
 SQLRETURN  SQL_API SQLFreeEnv(SQLHENV EnvironmentHandle)
 {
-    TestTrace(TEXT("SQLFreeEnv not implemented"));
-    return SQL_ERROR;
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLGetEnvAttr(SQLHENV EnvironmentHandle,

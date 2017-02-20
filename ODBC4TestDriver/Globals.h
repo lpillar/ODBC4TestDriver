@@ -39,6 +39,9 @@ struct CellStruct
     string name;
     string value;
     bool bound;
+    char *binding;
+    SQLLEN bindingLength;
+    SQLLEN *StrLen_or_Ind;
     bool dataAtFetch;
     bool notInThisRow;
 
@@ -74,7 +77,9 @@ struct IRDStruct : DescStruct
         unprocessedColumns.clear();
         for (auto c : columns)
         {
-            c.value.clear();
+            c.bound = false;
+            c.binding = NULL;
+            c.StrLen_or_Ind = 0;
             c.notInThisRow = true;
         }
     }
