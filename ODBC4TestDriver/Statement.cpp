@@ -5,8 +5,33 @@ SQLRETURN  SQL_API SQLBindCol(SQLHSTMT StatementHandle,
     _Inout_updates_opt_(_Inexpressible_(BufferLength)) SQLPOINTER TargetValue,
     SQLLEN BufferLength, _Inout_opt_ SQLLEN *StrLen_or_Ind)
 {
-    TestTrace("SQLBindCol not implemented");
-    return SQL_ERROR;
+    if (TargetType != SQL_C_CHAR)
+    {
+        TestTrace("SQLBindCol only implemented for strings.");
+        return SQL_ERROR;
+    }
+    IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
+    if (ird->columns.size() <= ColumnNumber || ird->currentColumn <= ColumnNumber)
+    {
+        return SQL_ERROR;
+    }
+    CellStruct &cell = ird->columns[ColumnNumber];
+
+    if (TargetValue == NULL)
+    {
+        cell.bound = false;
+        cell.binding = NULL;
+        return SQL_SUCCESS;
+    }
+    if (cell.type != TargetType)
+    {
+        return SQL_ERROR;
+    }
+    cell.bound = true;
+    cell.binding = (char*)TargetValue;
+    cell.bindingLength = BufferLength;
+    cell.StrLen_or_Ind = StrLen_or_Ind;
+    return SQL_SUCCESS;
 }
 
 SQLRETURN SQL_API SQLBindParameter(
@@ -243,8 +268,8 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
                 if (*MakeMB(it->first) == ird->columns[i].name) // Not currently checking type, just title
                 {
                     if (ird->columns[i].bound)
-                    {
-                        ird->columns[i].value = *(MakeMB(it->second.to_string()));
+                    { 
+                        strcpy_s(ird->columns[i].binding, ird->columns[i].bindingLength, MakeMB(it->second.as_string())->c_str());
                         // TODO: Add SQL_DATA_AT_FETCH code here for long buffers
                     }
                     found = true;
