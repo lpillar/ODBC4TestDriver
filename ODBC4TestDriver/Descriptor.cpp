@@ -21,7 +21,7 @@ SQLRETURN  SQL_API SQLGetDescField(SQLHDESC DescriptorHandle,
     case SQL_DESC_ARRAY_STATUS_PTR:
         return desc->GetArrayStatusPtr((SQLUSMALLINT**)Value);
     case SQL_DESC_BIND_OFFSET_PTR:
-        return desc->GetBindOffsetPtr((SQLINTEGER**)Value);
+        return desc->GetBindOffsetPtr((SQLLEN**)Value);
     case SQL_DESC_BIND_TYPE:
         return desc->GetBindType((SQLINTEGER*)Value);
     case SQL_DESC_COUNT:
