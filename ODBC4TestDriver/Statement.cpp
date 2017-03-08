@@ -248,10 +248,9 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 {
     IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
 
-    if (!ird->rowIter || // There must be rows available from Execute or something similar
-        ird->incompleteFetch) // Previous fetch must complete before new one - call SQLNextColumn
+    if (!ird->rowIter) // There must be rows available from Execute or something similar
     {
-        return SQL_ERROR; // HY010 Function Sequence Error
+        return SQL_ERROR;
     }
 
     if (ird->rowIter->HasMore())

@@ -102,15 +102,18 @@ struct EnvStruct
 
 struct DbcStruct
 {
-    DocumentDBConfiguration *conf;
-    DocumentClient *client;
+    DocumentDBConfiguration *conf = NULL;
+    DocumentClient *client = NULL;
     shared_ptr<Database> database;
     shared_ptr<Collection> collection;
     SQLINTEGER ansiApp;
 
     ~DbcStruct()
     {
-        delete conf, client;
+        if (conf)
+            delete conf;
+        if (client)
+            delete client;
     }
 };
 
