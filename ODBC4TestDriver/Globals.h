@@ -119,17 +119,24 @@ struct DbcStruct
 
 struct StmtStruct
 {
-    DbcStruct *dbc;
-    ARDStruct *ard;
-    APDStruct *apd;
-    IRDStruct *ird;
-    IPDStruct *ipd;
+    DbcStruct *dbc = NULL;
+    ARDStruct *ard = NULL;
+    APDStruct *apd = NULL;
+    IRDStruct *ird = NULL;
+    IPDStruct *ipd = NULL;
     shared_ptr<wstring> statement;
-    //bool supportsDynamicColumns; - currently hard-coded to support dynamic
+    bool supportsDynamicColumns = false;
 
     ~StmtStruct()
     {
-        delete ard, apd, ird, ipd;
+        if (ard)
+            delete ard;
+        if (apd)
+            delete apd;
+        if (ird)
+            delete ird;
+        if (ipd)
+            delete ipd;
     }
 };
 

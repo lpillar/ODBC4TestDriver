@@ -248,9 +248,10 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 {
     IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
 
-    if (!ird->rowIter) // There must be rows available from Execute or something similar
+    if (!ird->rowIter || // There must be rows available from Execute or something similar
+        ird->incompleteFetch) // Previous fetch must complete before new one - call SQLNextColumn
     {
-        return SQL_ERROR;
+        return SQL_ERROR; // HY010 Function Sequence Error
     }
 
     if (ird->rowIter->HasMore())
@@ -637,8 +638,8 @@ SQLRETURN  SQL_API SQLSetStmtAttr(SQLHSTMT StatementHandle,
     SQLINTEGER Attribute, _In_reads_(_Inexpressible_(StringLength)) SQLPOINTER Value,
     SQLINTEGER StringLength)
 {
-    TestTrace(TEXT("SQLSetStmtAttr not implemented"));
-    return SQL_ERROR;
+    
+    return SQL_SUCCESS;
 }
 
 SQLRETURN  SQL_API SQLSpecialColumns(SQLHSTMT StatementHandle,
