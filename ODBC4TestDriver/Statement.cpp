@@ -419,20 +419,39 @@ SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
     switch (Attribute)
     {
     case SQL_ATTR_APP_ROW_DESC:
-        *((ARDStruct**)Value) = ((StmtStruct*)StatementHandle)->ard;
+        if (Value)
+        {
+            *((ARDStruct**)Value) = ((StmtStruct*)StatementHandle)->ard;
+        }
         break;
     case SQL_ATTR_APP_PARAM_DESC:
-        *((APDStruct**)Value) = ((StmtStruct*)StatementHandle)->apd;
+        if (Value)
+        {
+            *((APDStruct**)Value) = ((StmtStruct*)StatementHandle)->apd;
+        }
         break;
     case SQL_ATTR_IMP_ROW_DESC:
-        *((IRDStruct**)Value) = ((StmtStruct*)StatementHandle)->ird;
+        if (Value)
+        {
+            *((IRDStruct**)Value) = ((StmtStruct*)StatementHandle)->ird;
+        }
         break;
     case SQL_ATTR_IMP_PARAM_DESC:
-        *((IPDStruct**)Value) = ((StmtStruct*)StatementHandle)->ipd;
+        if (Value)
+        {
+            *((IPDStruct**)Value) = ((StmtStruct*)StatementHandle)->ipd;
+        }
         break;
     case SQL_ATTR_DYNAMIC_COLUMNS:
         // Currently hard-coded to support dynamic columns
-        *((SQLINTEGER*)Value) = ((StmtStruct*)StatementHandle)->supportsDynamicColumns;
+        if (Value)
+        {
+            *((SQLINTEGER*)Value) = ((StmtStruct*)StatementHandle)->supportsDynamicColumns;
+        }
+        if (StringLength)
+        {
+            *StringLength = sizeof(SQLINTEGER);
+        }
         break;
     default:
         TestTrace(TEXT("SQLGetStmtAttr not implemented for this attribute"));
@@ -643,7 +662,7 @@ SQLRETURN  SQL_API SQLSetStmtAttr(SQLHSTMT StatementHandle,
     switch (Attribute)
     {
     case SQL_ATTR_DYNAMIC_COLUMNS:
-        ((StmtStruct*)StatementHandle)->supportsDynamicColumns = *(SQLINTEGER*)Value;
+        ((StmtStruct*)StatementHandle)->supportsDynamicColumns = (SQLINTEGER)Value;
     }
     return SQL_SUCCESS;
 }

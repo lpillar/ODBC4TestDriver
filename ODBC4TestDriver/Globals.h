@@ -125,7 +125,7 @@ struct StmtStruct
     IRDStruct *ird = NULL;
     IPDStruct *ipd = NULL;
     shared_ptr<wstring> statement;
-    SQLINTEGER supportsDynamicColumns = false;
+    SQLINTEGER supportsDynamicColumns = 0L;
 
     ~StmtStruct()
     {
