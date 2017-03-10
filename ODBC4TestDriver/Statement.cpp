@@ -285,12 +285,14 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
             }
         }
 
-        if (ird->incompleteFetch)
+        if (ird->incompleteFetch && ((StmtStruct*)StatementHandle)->supportsDynamicColumns)
         {
             return SQL_DATA_AVAILABLE;
         }
         else
         {
+            ird->incompleteFetch = false;
+            ird->unprocessedColumns.clear();
             return SQL_SUCCESS;
         }
     }
@@ -430,7 +432,7 @@ SQLRETURN  SQL_API SQLGetStmtAttr(SQLHSTMT StatementHandle,
         break;
     case SQL_ATTR_DYNAMIC_COLUMNS:
         // Currently hard-coded to support dynamic columns
-        *((SQLINTEGER*)Value) = SQL_TRUE;
+        *((SQLINTEGER*)Value) = ((StmtStruct*)StatementHandle)->supportsDynamicColumns;
         break;
     default:
         TestTrace(TEXT("SQLGetStmtAttr not implemented for this attribute"));
@@ -638,7 +640,11 @@ SQLRETURN  SQL_API SQLSetStmtAttr(SQLHSTMT StatementHandle,
     SQLINTEGER Attribute, _In_reads_(_Inexpressible_(StringLength)) SQLPOINTER Value,
     SQLINTEGER StringLength)
 {
-    
+    switch (Attribute)
+    {
+    case SQL_ATTR_DYNAMIC_COLUMNS:
+        ((StmtStruct*)StatementHandle)->supportsDynamicColumns = *(SQLINTEGER*)Value;
+    }
     return SQL_SUCCESS;
 }
 
