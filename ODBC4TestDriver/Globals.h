@@ -42,17 +42,15 @@ struct CellStruct
     char *binding;
     SQLLEN bindingLength;
     SQLLEN *StrLen_or_Ind;
-    bool dataAtFetch;
     bool notInThisRow;
 
     CellStruct(string _name, SQLSMALLINT _type = SQL_C_CHAR, bool _bound = false,
-               string _value = "", bool _dataAtFetch = false, bool _notInThisRow = false)
+               string _value = "", bool _notInThisRow = false)
     {
         name = _name;
         type = _type;
         bound = _bound;
         value = _value;
-        dataAtFetch = _dataAtFetch;
         notInThisRow = _notInThisRow;
     }
 };
