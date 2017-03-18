@@ -10,6 +10,7 @@
 #include <documentdbcpp\exceptions.h>
 #include <documentdbcpp\TriggerOperation.h>
 #include <documentdbcpp\TriggerType.h>
+#include <set>
 
 using namespace documentdb;
 using namespace std;
@@ -43,15 +44,25 @@ struct CellStruct
     SQLLEN bindingLength;
     SQLLEN *StrLen_or_Ind;
     bool notInThisRow;
+    SQLUSMALLINT columnNumber;
 
-    CellStruct(string _name, SQLSMALLINT _type = SQL_C_CHAR, bool _bound = false,
-               string _value = "", bool _notInThisRow = false)
+    CellStruct(string _name, SQLUSMALLINT _columnNumber, SQLSMALLINT _type = SQL_C_CHAR,
+               bool _bound = false, string _value = "", bool _notInThisRow = false)
     {
         name = _name;
+        columnNumber = _columnNumber;
         type = _type;
         bound = _bound;
         value = _value;
         notInThisRow = _notInThisRow;
+    }
+};
+
+struct cell_compare
+{
+    bool operator() (const CellStruct &a, const CellStruct &b)
+    {
+        return a.columnNumber < b.columnNumber;
     }
 };
 
@@ -60,14 +71,10 @@ struct IRDStruct : DescStruct
     shared_ptr<DocumentIterator> rowIter;
     vector<CellStruct> columns;
     shared_ptr<Document> doc;
-    vector<CellStruct> unprocessedColumns;
-    SQLUSMALLINT currentColumn; // 0 is bookmark; subtract one to index into doc->payload()
-    bool incompleteFetch;
+    set<CellStruct, cell_compare> unprocessedColumns;
 
     void resetRow()
     {
-        incompleteFetch = false;
-        currentColumn = 0;
         if (doc)
         {
             doc.reset();
@@ -75,9 +82,6 @@ struct IRDStruct : DescStruct
         unprocessedColumns.clear();
         for (auto c : columns)
         {
-            c.bound = false;
-            c.binding = NULL;
-            c.StrLen_or_Ind = 0;
             c.notInThisRow = true;
         }
     }
