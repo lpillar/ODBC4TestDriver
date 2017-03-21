@@ -47,7 +47,7 @@ struct CellStruct
     SQLUSMALLINT columnNumber;
 
     CellStruct(string _name, SQLUSMALLINT _columnNumber, SQLSMALLINT _type = SQL_C_CHAR,
-               bool _bound = false, string _value = "", bool _notInThisRow = false)
+               bool _bound = false, string _value = "", bool _notInThisRow = false, SQLLEN *_strlen_or_ind = NULL)
     {
         name = _name;
         columnNumber = _columnNumber;
@@ -55,6 +55,7 @@ struct CellStruct
         bound = _bound;
         value = _value;
         notInThisRow = _notInThisRow;
+        StrLen_or_Ind = _strlen_or_ind;
     }
 };
 
@@ -71,7 +72,7 @@ struct IRDStruct : DescStruct
     shared_ptr<DocumentIterator> rowIter;
     vector<CellStruct> columns;
     shared_ptr<Document> doc;
-    set<CellStruct, cell_compare> unprocessedColumns;
+    multiset<CellStruct, cell_compare> unprocessedColumns;
 
     void resetRow()
     {
