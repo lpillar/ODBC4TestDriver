@@ -222,7 +222,7 @@ SQLRETURN  SQL_API SQLExecDirect
 )
 {
     StmtStruct *stmt = (StmtStruct*)StatementHandle;
-    stmt->statement = MakeWide((char*)StatementText);
+    stmt->statement = MakeWide(string((char*)StatementText, TextLength != SQL_NTS ? TextLength : string::npos));
     try
     {
         stmt->ird->resetRow();
