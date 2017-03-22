@@ -297,8 +297,8 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
         }
 
         if (!ird->unprocessedColumns.empty() &&
-                ird->unprocessedColumns.begin()->columnNumber < USHRT_MAX ||
-            ((StmtStruct*)StatementHandle)->supportsDynamicColumns)
+                (ird->unprocessedColumns.begin()->columnNumber < USHRT_MAX ||
+            ((StmtStruct*)StatementHandle)->supportsDynamicColumns))
         {
             return SQL_DATA_AVAILABLE;
         }
@@ -501,31 +501,32 @@ SQLRETURN SQL_API SQLNextColumn(SQLHSTMT StatementHandle,
         return SQL_ERROR; 
     }
 
-	if (ColumnCount == 0) 
-	{   // Skip all remaining unbound columns
-		ird->unprocessedColumns.clear();
-		return SQL_SUCCESS;
-	}
-    else
-    {
+    do  // Run once unless ColumnCount is 0, in which case finish the row
+    {   // Data-at-Fetch
         auto cell = ird->unprocessedColumns.begin();
         if (cell->columnNumber < USHRT_MAX)
-        { // Data-at-Fetch
+        {
             CellStruct &c = ird->columns[cell->columnNumber];
             c.value = cell->value;
             ird->unprocessedColumns.erase(cell);
-            *ColumnCount = c.columnNumber;
+            if (ColumnCount)
+            {
+                *ColumnCount = c.columnNumber;
+            }
         }
         else
-        {   // New Dynamic Column
+        {  // New Dynamic Column
             ird->columns.push_back(*cell);
             ird->columns.back().columnNumber = (SQLUSMALLINT)ird->columns.size() - 1;
             ird->unprocessedColumns.erase(cell);
-            *ColumnCount = ird->columns.back().columnNumber;
+            if (ColumnCount)
+            {
+                *ColumnCount = ird->columns.back().columnNumber;
+            }
         }
+    } while (ColumnCount == 0 && (!ird->unprocessedColumns.empty()));
 
-        return ird->unprocessedColumns.empty() ? SQL_SUCCESS : SQL_DATA_AVAILABLE;
-    }
+    return ird->unprocessedColumns.empty() ? SQL_SUCCESS : SQL_DATA_AVAILABLE;
 }
 
 SQLRETURN SQL_API SQLNumParams(
