@@ -22,8 +22,37 @@ SQLRETURN  SQL_API SQLAllocHandle(SQLSMALLINT HandleType,
     case SQL_HANDLE_ENV:
         *OutputHandle = new EnvStruct;
         return SQL_SUCCESS;
+    case SQL_HANDLE_STMT:
+        *OutputHandle = new StmtStruct;
+        ((StmtStruct*)(*OutputHandle))->dbc = (DbcStruct*)InputHandle;
+        ((StmtStruct*)(*OutputHandle))->ard = new ARDStruct;
+        ((StmtStruct*)(*OutputHandle))->apd = new APDStruct;
+        ((StmtStruct*)(*OutputHandle))->ird = new IRDStruct;
+        ((StmtStruct*)(*OutputHandle))->ird->columns.push_back(CellStruct("Bookmark Column", SQL_C_CHAR));
+        ((StmtStruct*)(*OutputHandle))->ird->resetRow();
+        ((StmtStruct*)(*OutputHandle))->ipd = new IPDStruct;
+        return SQL_SUCCESS;
     default:
         MessageBox(GetDesktopWindow(), TEXT("Not Implemented"), NULL, MB_OK);
+        return SQL_ERROR;
+    }
+}
+
+SQLRETURN  SQL_API SQLFreeHandle(SQLSMALLINT HandleType, SQLHANDLE Handle)
+{
+    switch (HandleType)
+    {
+    case SQL_HANDLE_DBC:
+        delete (DbcStruct *)Handle;
+        return SQL_SUCCESS;
+    case SQL_HANDLE_ENV:
+        delete (EnvStruct *)Handle;
+        return SQL_SUCCESS;
+    case SQL_HANDLE_STMT:
+        delete (StmtStruct *)Handle;
+        return SQL_SUCCESS;
+    default:
+        TestTrace(TEXT("SQLFreeHandle not implemented"));
         return SQL_ERROR;
     }
 }
