@@ -10,27 +10,37 @@ SQLRETURN  SQL_API SQLBindCol(SQLHSTMT StatementHandle,
         TestTrace("SQLBindCol only implemented for strings.");
         return SQL_ERROR;
     }
+
     IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
-    if (ird->columns.size() <= ColumnNumber || ird->currentColumn <= ColumnNumber)
+
+    if (ird->columns.size() <= ColumnNumber ||
+        !ird->unprocessedColumns.empty() && ird->unprocessedColumns.begin()->columnNumber <= ColumnNumber  ||
+        TargetValue && !StrLen_or_Ind       ||                          // StrLen_or_Ind is required unless unbinding
+        StrLen_or_Ind && ird->columns[ColumnNumber].type != TargetType) // The binding type must match
     {
         return SQL_ERROR;
     }
+
     CellStruct &cell = ird->columns[ColumnNumber];
 
-    if (TargetValue == NULL)
-    {
+    if (TargetValue == NULL && (!StrLen_or_Ind || *StrLen_or_Ind != SQL_DATA_AT_FETCH))
+    {   // Unbind
         cell.bound = false;
         cell.binding = NULL;
-        return SQL_SUCCESS;
     }
-    if (cell.type != TargetType)
-    {
-        return SQL_ERROR;
+    else if (*StrLen_or_Ind == SQL_DATA_AT_FETCH)
+    {   // Data at Fetch
+        cell.StrLen_or_Ind = StrLen_or_Ind;
+        cell.bound = false;
+        cell.binding = NULL;
     }
-    cell.bound = true;
-    cell.binding = (char*)TargetValue;
-    cell.bindingLength = BufferLength;
-    cell.StrLen_or_Ind = StrLen_or_Ind;
+    else
+    {   // Standard binding
+        cell.StrLen_or_Ind = StrLen_or_Ind;
+        cell.bound = true;
+        cell.binding = (char*)TargetValue;
+        cell.bindingLength = BufferLength;
+    }
     return SQL_SUCCESS;
 }
 
@@ -144,7 +154,7 @@ SQLRETURN  SQL_API SQLDescribeCol(SQLHSTMT StatementHandle,
     if (ColumnNumber == 0 || // Bookmark column
         ird == NULL ||
         ColumnNumber >= ird->columns.size() ||
-        ird->currentColumn <= ColumnNumber) // Hasn't been fetched or SQLNextColumn-ed yet
+        !ird->unprocessedColumns.empty() && ird->unprocessedColumns.begin()->columnNumber <= ColumnNumber) // Hasn't been fetched or SQLNextColumn-ed yet
     {
         return SQL_ERROR;
     }
@@ -212,7 +222,7 @@ SQLRETURN  SQL_API SQLExecDirect
 )
 {
     StmtStruct *stmt = (StmtStruct*)StatementHandle;
-    stmt->statement = MakeWide((char*)StatementText);
+    stmt->statement = MakeWide(string((char*)StatementText, TextLength != SQL_NTS ? TextLength : string::npos));
     try
     {
         stmt->ird->resetRow();
@@ -248,8 +258,8 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
 {
     IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
 
-    if (!ird->rowIter || // There must be rows available from Execute or something similar
-        ird->incompleteFetch) // Previous fetch must complete before new one - call SQLNextColumn
+    if (!ird->rowIter ||                  // There must be rows available from Execute or something similar
+        !ird->unprocessedColumns.empty()) // Previous fetch must complete before new one - call SQLNextColumn
     {
         return SQL_ERROR; // HY010 Function Sequence Error
     }
@@ -270,7 +280,10 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
                     if (ird->columns[i].bound)
                     { 
                         strcpy_s(ird->columns[i].binding, ird->columns[i].bindingLength, MakeMB(it->second.as_string())->c_str());
-                        // TODO: Add SQL_DATA_AT_FETCH code here for long buffers
+                    }
+                    else if (ird->columns[i].StrLen_or_Ind && *(ird->columns[i].StrLen_or_Ind) == SQL_DATA_AT_FETCH)
+                    {
+                        ird->unprocessedColumns.insert(CellStruct(*MakeMB(it->first), (SQLUSMALLINT)i, SQL_C_CHAR, false, *(MakeMB(it->second.to_string()))));
                     }
                     found = true;
                     ird->columns[i].notInThisRow = false;
@@ -279,19 +292,18 @@ SQLRETURN  SQL_API SQLFetch(SQLHSTMT StatementHandle)
             }
             if (!found)
             {
-                ird->unprocessedColumns.push_back(CellStruct(*MakeMB(it->first), SQL_C_CHAR, false, *(MakeMB(it->second.to_string()))));
-                ird->currentColumn = (SQLUSMALLINT)ird->columns.size();
-                ird->incompleteFetch = true;
+                ird->unprocessedColumns.insert(CellStruct(*MakeMB(it->first), USHRT_MAX, SQL_C_CHAR, false, *(MakeMB(it->second.to_string()))));
             }
         }
 
-        if (ird->incompleteFetch && ((StmtStruct*)StatementHandle)->supportsDynamicColumns)
+        if (!ird->unprocessedColumns.empty() &&
+                (ird->unprocessedColumns.begin()->columnNumber < USHRT_MAX ||
+            ((StmtStruct*)StatementHandle)->supportsDynamicColumns))
         {
             return SQL_DATA_AVAILABLE;
         }
         else
         {
-            ird->incompleteFetch = false;
             ird->unprocessedColumns.clear();
             return SQL_SUCCESS;
         }
@@ -372,7 +384,7 @@ SQLRETURN  SQL_API SQLGetData(SQLHSTMT StatementHandle,
     {
         return SQL_ERROR; // invalid handle
     }
-    if (ird->incompleteFetch && ird->currentColumn <= ColumnNumber)
+    if (!ird->unprocessedColumns.empty() && ird->unprocessedColumns.begin()->columnNumber <= ColumnNumber)
     {
         return SQL_ERROR; // This column has not been processed by SQLNextColumn yet
     }
@@ -484,34 +496,37 @@ SQLRETURN SQL_API SQLNextColumn(SQLHSTMT StatementHandle,
     }
 
     IRDStruct *ird = ((StmtStruct*)StatementHandle)->ird;
-    if (!ird->incompleteFetch)
-    {
-        return SQL_ERROR; // HY010
+    if (ird->unprocessedColumns.empty())
+    {   // HY010 - function sequence error
+        return SQL_ERROR; 
     }
 
-    if (ird->currentColumn < ird->columns.size()) // This is a variable length column
-    {
-        return SQL_ERROR; // How did this happen? It's not implemented yet.
-    }
-    else // This is a new dynamic column
-    {
-        if (ird->unprocessedColumns.empty())
+    do  // Run once unless ColumnCount is 0, in which case finish the row
+    {   // Data-at-Fetch
+        auto cell = ird->unprocessedColumns.begin();
+        if (cell->columnNumber < USHRT_MAX)
         {
-            return SQL_ERROR; // How did this happen?
-        }
-        *ColumnCount = ird->currentColumn++;
-        ird->columns.push_back(ird->unprocessedColumns.front());
-        ird->unprocessedColumns.erase(ird->unprocessedColumns.begin());
-        if (ird->unprocessedColumns.empty())
-        {
-            ird->incompleteFetch = false;
-            return SQL_SUCCESS;
+            CellStruct &c = ird->columns[cell->columnNumber];
+            c.value = cell->value;
+            ird->unprocessedColumns.erase(cell);
+            if (ColumnCount)
+            {
+                *ColumnCount = c.columnNumber;
+            }
         }
         else
-        {
-            return SQL_DATA_AVAILABLE;
+        {  // New Dynamic Column
+            ird->columns.push_back(*cell);
+            ird->columns.back().columnNumber = (SQLUSMALLINT)ird->columns.size() - 1;
+            ird->unprocessedColumns.erase(cell);
+            if (ColumnCount)
+            {
+                *ColumnCount = ird->columns.back().columnNumber;
+            }
         }
-    }
+    } while (ColumnCount == 0 && (!ird->unprocessedColumns.empty()));
+
+    return ird->unprocessedColumns.empty() ? SQL_SUCCESS : SQL_DATA_AVAILABLE;
 }
 
 SQLRETURN SQL_API SQLNumParams(

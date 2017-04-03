@@ -30,9 +30,14 @@ int main()
     doc = coll->CreateDocument(document_family);
 
     value document_2;
-    document_2[L"id"] = value::string(L"JohnFamily");
-    document_2[L"FirstName"] = value::string(L"John");
-    document_2[L"City"] = value::string(L"Waunakee");
-    document_2[L"State"] = value::string(L"Wisconsin");
+    document_2[L"id"] = value::string(L"SmithFamily");
+    document_2[L"LastName"] = value::string(L"Smith");
     doc = coll->CreateDocument(document_2);
+
+    value document_3;
+    document_3[L"id"] = value::string(L"JohnFamily");
+    document_3[L"FirstName"] = value::string(L"John");
+    document_3[L"City"] = value::string(L"Waunakee");
+    document_3[L"State"] = value::string(L"Wisconsin");
+    doc = coll->CreateDocument(document_3);
 }
